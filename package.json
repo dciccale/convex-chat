@@ -1,0 +1,22 @@
+{
+  "name": "convex-chat-workspace",
+  "private": true,
+  "packageManager": "pnpm@10.23.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "turbo build",
+    "convex:dev": "pnpm --filter @convex-chat/web convex:dev",
+    "dev": "turbo dev",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "turbo test",
+    "typecheck": "turbo typecheck"
+  },
+  "devDependencies": {
+    "prettier": "3.9.6",
+    "turbo": "2.10.8",
+    "typescript": "npm:@typescript/typescript6@^6.0.2"
+  }
+}

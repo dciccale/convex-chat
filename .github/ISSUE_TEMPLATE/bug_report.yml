@@ -1,0 +1,42 @@
+name: Bug report
+description: Report a reproducible problem in convex-chat
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to report a bug. For security issues, use a private security advisory instead.
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: Which package version or commit are you using?
+      placeholder: 0.1.0-alpha.0 or a commit SHA
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the actual behavior and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Include a repository, code sample, or exact steps that reproduce the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include Node.js, pnpm, Convex, browser, and operating-system versions when relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add logs, screenshots, or other useful details. Remove credentials and private data.

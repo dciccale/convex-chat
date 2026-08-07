@@ -1,0 +1,80 @@
+{
+  "name": "convex-chat",
+  "version": "0.1.0-alpha.0",
+  "description": "Authorization-aware human chat primitives for Convex applications.",
+  "keywords": [
+    "chat",
+    "convex",
+    "messaging",
+    "realtime",
+    "typescript"
+  ],
+  "homepage": "https://github.com/dciccale/convex-chat#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dciccale/convex-chat.git",
+    "directory": "packages/convex-chat"
+  },
+  "bugs": {
+    "url": "https://github.com/dciccale/convex-chat/issues"
+  },
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "type": "module",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "main": "./dist/client/index.js",
+  "types": "./dist/client/index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./dist/client/index.d.ts",
+      "default": "./dist/client/index.js"
+    },
+    "./_generated/component.js": {
+      "types": "./dist/component/_generated/component.d.ts"
+    },
+    "./convex.config": {
+      "types": "./dist/component/convex.config.d.ts",
+      "default": "./dist/component/convex.config.js"
+    },
+    "./convex.config.js": {
+      "types": "./dist/component/convex.config.d.ts",
+      "default": "./dist/component/convex.config.js"
+    },
+    "./test": {
+      "types": "./src/test.ts",
+      "default": "./src/test.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc6 -p tsconfig.build.json",
+    "build:codegen": "cd ../../apps/web && convex codegen --component-dir ../../packages/convex-chat/src/component --typecheck disable && cd ../../packages/convex-chat && pnpm build",
+    "dev": "tsc6 -p tsconfig.build.json --watch",
+    "prepack": "pnpm build",
+    "test": "vitest run",
+    "typecheck": "tsc6 --noEmit"
+  },
+  "peerDependencies": {
+    "convex": "^1.43.0"
+  },
+  "devDependencies": {
+    "@edge-runtime/vm": "^5.0.0",
+    "@types/node": "^24.12.2",
+    "convex": "1.43.0",
+    "convex-test": "0.0.49",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
+    "vite": "8.2.0",
+    "vitest": "4.1.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@convex-dev/presence": "0.4.0"
+  }
+}

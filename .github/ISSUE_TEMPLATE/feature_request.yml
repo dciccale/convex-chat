@@ -1,0 +1,31 @@
+name: Feature request
+description: Propose an improvement to convex-chat
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What application or developer problem would this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the API or behavior you would like to see.
+    validations:
+      required: true
+  - type: textarea
+    id: boundary
+    attributes:
+      label: Component boundary
+      description: Explain why this belongs in the reusable component rather than in host application policy.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What workarounds or other designs have you considered?

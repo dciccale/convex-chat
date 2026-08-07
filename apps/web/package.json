@@ -1,0 +1,28 @@
+{
+  "name": "@convex-chat/web",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "convex:dev": "convex dev --typecheck-components",
+    "dev": "next dev",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@convex-chat/r2": "workspace:*",
+    "@convex-dev/r2": "0.10.2",
+    "convex": "1.43.0",
+    "convex-chat": "workspace:*",
+    "next": "16.3.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "^24.12.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "5.9.3",
+    "vitest": "4.1.4"
+  }
+}
