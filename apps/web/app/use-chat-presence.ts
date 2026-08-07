@@ -119,7 +119,14 @@ export function useChatPresence({
       document.removeEventListener("visibilitychange", handleVisibility);
       window.removeEventListener("beforeunload", handleUnload);
     };
-  }, [conversationId, convex.url, disconnect, heartbeat, instanceId, subjectId]);
+  }, [
+    conversationId,
+    convex.url,
+    disconnect,
+    heartbeat,
+    instanceId,
+    subjectId,
+  ]);
 
   const setTyping = useCallback(
     (typing: boolean) => {
