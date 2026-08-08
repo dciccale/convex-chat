@@ -1,6 +1,7 @@
 import { ConvexError } from "convex/values";
 import type { Id } from "./_generated/dataModel.js";
 import type { MutationCtx, QueryCtx } from "./_generated/server.js";
+import { validateIdentifier } from "./limits.js";
 
 type ReadCtx = Pick<QueryCtx, "db"> | Pick<MutationCtx, "db">;
 
@@ -35,6 +36,8 @@ export async function requireMembership(
     write?: boolean;
   },
 ) {
+  validateIdentifier(args.scopeId, "scopeId");
+  validateIdentifier(args.subjectId, "subjectId");
   const conversationId =
     typeof args.conversationId === "string"
       ? await resolveConversationId(ctx, args.conversationId)

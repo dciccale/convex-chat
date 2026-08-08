@@ -37,14 +37,21 @@ export function exposeChatApi(
 ) {
   return {
     listConversations: queryGeneric({
-      args: {},
-      handler: async (ctx) => {
+      args: { limit: v.optional(v.number()) },
+      handler: async (ctx, args) => {
         const actor = await options.authenticate(ctx);
-        return ctx.runQuery(component.conversations.list, actor);
+        return ctx.runQuery(component.conversations.list, {
+          ...actor,
+          ...args,
+        });
       },
     }),
     listMessages: queryGeneric({
-      args: { conversationId: v.string() },
+      args: {
+        conversationId: v.string(),
+        beforeSequence: v.optional(v.number()),
+        limit: v.optional(v.number()),
+      },
       handler: async (ctx, args) => {
         const actor = await options.authenticate(ctx);
         return ctx.runQuery(component.messages.list, { ...actor, ...args });

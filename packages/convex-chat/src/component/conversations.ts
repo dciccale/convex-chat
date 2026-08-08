@@ -1,5 +1,11 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server.js";
+import {
+  CHAT_LIMITS,
+  normalizePageSize,
+  validateBoundedString,
+  validateIdentifier,
+} from "./limits.js";
 import { chatError } from "./model.js";
 import { conversationKind } from "./validators.js";
 
@@ -30,6 +36,24 @@ export const create = mutation({
   },
   returns: v.object({ id: v.string(), created: v.boolean() }),
   handler: async (ctx, args) => {
+    validateIdentifier(args.scopeId, "scopeId");
+    validateIdentifier(args.createdBySubjectId, "createdBySubjectId");
+    if (args.externalKey !== undefined) {
+      validateBoundedString(args.externalKey, "externalKey", 500);
+    }
+    const title = args.title?.trim() || undefined;
+    if (title !== undefined) {
+      validateBoundedString(title, "title", CHAT_LIMITS.titleCodePoints);
+    }
+    if (args.memberSubjectIds.length > CHAT_LIMITS.membersPerConversation) {
+      chatError(
+        "INVALID_ARGUMENT",
+        `A conversation can have at most ${CHAT_LIMITS.membersPerConversation} members`,
+      );
+    }
+    for (const subjectId of args.memberSubjectIds) {
+      validateIdentifier(subjectId, "memberSubjectId");
+    }
     const subjects = [...new Set(args.memberSubjectIds)];
     if (!subjects.includes(args.createdBySubjectId)) {
       subjects.unshift(args.createdBySubjectId);
@@ -40,7 +64,7 @@ export const create = mutation({
     if (args.kind === "group" && subjects.length < 2) {
       chatError("INVALID_ARGUMENT", "Groups require at least two members");
     }
-    if (subjects.length > 100) {
+    if (subjects.length > CHAT_LIMITS.membersPerConversation) {
       chatError(
         "INVALID_ARGUMENT",
         "A conversation can have at most 100 members",
@@ -54,7 +78,29 @@ export const create = mutation({
           q.eq("scopeId", args.scopeId).eq("externalKey", args.externalKey),
         )
         .unique();
-      if (existing) return { id: String(existing._id), created: false };
+      if (existing) {
+        const memberships = await ctx.db
+          .query("memberships")
+          .withIndex("conversation_state_role", (q) =>
+            q.eq("conversationId", existing._id).eq("state", "active"),
+          )
+          .collect();
+        const existingSubjects = memberships
+          .map((membership) => membership.subjectId)
+          .sort();
+        const requestedSubjects = [...subjects].sort();
+        if (
+          existing.kind !== args.kind ||
+          existing.title !== title ||
+          JSON.stringify(existingSubjects) !== JSON.stringify(requestedSubjects)
+        ) {
+          chatError(
+            "IDEMPOTENCY_CONFLICT",
+            "externalKey was already used for a different conversation",
+          );
+        }
+        return { id: String(existing._id), created: false };
+      }
     }
 
     const now = Date.now();
@@ -62,7 +108,7 @@ export const create = mutation({
       scopeId: args.scopeId,
       kind: args.kind,
       externalKey: args.externalKey,
-      title: args.title?.trim() || undefined,
+      title,
       state: "active",
       createdBySubjectId: args.createdBySubjectId,
       nextSequence: 1,
@@ -106,7 +152,9 @@ export const list = query({
   },
   returns: v.array(conversationSummary),
   handler: async (ctx, args) => {
-    const limit = Math.max(1, Math.min(args.limit ?? 50, 100));
+    validateIdentifier(args.scopeId, "scopeId");
+    validateIdentifier(args.subjectId, "subjectId");
+    const limit = normalizePageSize(args.limit);
     const memberships = (
       await Promise.all(
         (["read_write", "read_only"] as const).map((access) =>

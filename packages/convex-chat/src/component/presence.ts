@@ -3,6 +3,7 @@ import { v } from "convex/values";
 import { components } from "./_generated/api.js";
 import type { MutationCtx, QueryCtx } from "./_generated/server.js";
 import { mutation, query } from "./_generated/server.js";
+import { validateIdentifier } from "./limits.js";
 import { chatError, requireMembership } from "./model.js";
 
 const presence = new Presence(components.presence);
@@ -197,6 +198,8 @@ async function requireScopeParticipant(
   ctx: QueryCtx | MutationCtx,
   args: { scopeId: string; subjectId: string },
 ) {
+  validateIdentifier(args.scopeId, "scopeId");
+  validateIdentifier(args.subjectId, "subjectId");
   const memberships = await Promise.all(
     (["read_write", "read_only"] as const).map((access) =>
       ctx.db

@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- Freeze and document the supported `0.1` contract, upgrade and rollback
+  practice, security review, release procedure, and release-candidate evidence.
+- Add authorization, concurrency, idempotency, pagination, history-boundary,
+  and input-limit regression coverage with enforced critical-component coverage
+  thresholds.
+- Reject external conversation-key retries whose kind, title, or member set
+  changed, and include reply targets in message idempotency conflicts.
+- Bound public identifiers, text, pagination, attachment metadata, and membership
+  fan-out, and document the limits hosts may tighten further.
+- Expose optional conversation and older-message pagination arguments from the
+  recommended host API.
+- Verify public declarations and package exports, install and audit the tarball
+  in a clean consumer, and test Node and Convex compatibility in CI.
+- Add a guarded manual npm release workflow with dry-run verification and
+  provenance publishing.
 - Add the Convex Components marketplace badge and document the release-readiness
   checklist for moving beyond alpha.
 - Make clean workspace builds resolve the nested component test registrars'

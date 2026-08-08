@@ -8,8 +8,10 @@ icon: Braces
 
 ## Conversations and messages
 
-- `listConversations` returns conversation summaries for the actor.
-- `listMessages` returns ordered message projections after membership checks.
+- `listConversations` returns conversation summaries for the actor and accepts an
+  optional bounded `limit`.
+- `listMessages` returns ordered message projections after membership checks and
+  accepts optional `beforeSequence` and `limit` arguments for older-page loading.
 - `sendText` sends an idempotent text message.
 - `sendAttachment` sends a provider-neutral attachment descriptor.
 - `editOwnTextPart` replaces the actor's text part when its expected revision matches.

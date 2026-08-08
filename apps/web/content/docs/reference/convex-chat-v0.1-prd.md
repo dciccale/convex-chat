@@ -16,6 +16,11 @@ license_target: Apache-2.0
 > This is the original v0.1 design proposal and implementation roadmap. The
 > repository README, package README, changelog, and exported types describe the
 > currently implemented alpha.
+>
+> The maintained [supported contract](/docs/reference/supported-contract)
+> supersedes proposal details that changed during implementation. In
+> particular, an already-sent reply intentionally retains its bounded quote
+> snapshot after its source is deleted.
 
 ## Executive Decision
 

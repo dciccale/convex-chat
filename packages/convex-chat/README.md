@@ -78,10 +78,15 @@ host application can integrate Cloudflare R2, native Convex storage, S3, or
 another provider without changing the durable chat model.
 
 See the [repository README](https://github.com/dciccale/convex-chat#readme),
+[supported contract](https://convex-chat.dev/docs/reference/supported-contract),
 [presence guide](https://github.com/dciccale/convex-chat/blob/main/apps/web/content/docs/guides/presence.md),
 [attachment guide](https://github.com/dciccale/convex-chat/blob/main/apps/web/content/docs/guides/attachments.md),
 and [security policy](https://github.com/dciccale/convex-chat/security/policy)
 for more detail.
+
+Projects importing `convex-chat/test` should install compatible `convex-test`
+and Vite versions as development dependencies. They are optional peers and are
+not required by production consumers.
 
 ## License
 

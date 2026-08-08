@@ -1,0 +1,30 @@
+{
+  "declarationSha256": "69036c505c467d664616fa581830cc31a3dc2491b3d331ce2388493a4a476b43",
+  "exports": [
+    ".",
+    "./_generated/component.js",
+    "./convex.config",
+    "./convex.config.js",
+    "./package.json",
+    "./test"
+  ],
+  "types": ["ChatAttachment", "MutationCtx", "QueryCtx"],
+  "functions": ["exposeChatApi"],
+  "hostApi": [
+    "deleteOwnMessage",
+    "disconnectOnline",
+    "disconnectPresence",
+    "editOwnTextPart",
+    "heartbeatOnline",
+    "heartbeatPresence",
+    "listConversations",
+    "listMessages",
+    "listOnline",
+    "listPresence",
+    "markReadThrough",
+    "sendAttachment",
+    "sendText",
+    "setReaction",
+    "setTyping"
+  ]
+}

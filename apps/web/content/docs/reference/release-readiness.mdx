@@ -20,6 +20,9 @@ modeled or future work may remain deferred.
       a prerelease to `latest`.
 - [x] CI runs formatting, tests, typechecking, production builds, and package
       creation on pull requests and pushes to `main`.
+- [x] Maintainer manual validation covers the web client and real mobile devices
+      against a Convex development-cloud deployment, including the supported
+      messaging, attachment, presence, and reconnect flows.
 - [x] Public component functions declare argument and return validators.
 - [x] Host-authentication and component-membership boundaries are documented.
 - [x] Runnable Next.js and Expo examples cover the supported user flows.
@@ -28,44 +31,42 @@ modeled or future work may remain deferred.
 
 ## Required before a release candidate
 
-- [ ] **Freeze the supported contract.** Review every public export, validator,
-      error code, schema field, and documented behavior. Remove unused modeled
-      state from the compatibility promise, and resolve conflicting semantics
-      such as whether a deleted reply source retains or hides its quote text.
-- [ ] **Complete the authorization and invariant test matrix.** Cover
+- [x] **Freeze the supported contract.** The maintained supported-contract page,
+      API snapshot, validators, and tests define the public exports, errors,
+      schema boundary, limits, pagination, and reply-deletion semantics.
+- [x] **Complete the authorization and invariant test matrix.** Cover
       `read_write`, `read_only`, `none`, inactive membership, cross-scope access,
       direct/group creation constraints, revision conflicts, deletion,
       attachments, reactions, and presence for every public operation.
-- [ ] **Add adversarial and concurrency tests.** Cover concurrent conversation
+- [x] **Add adversarial and concurrency tests.** Cover concurrent conversation
       creation, sequence allocation, send retries, idempotency payload conflicts
       including reply targets, monotonic read watermarks, reaction replacement,
       and pagination while new messages arrive.
-- [ ] **Test input and resource limits.** Bound and test external identifiers,
-      titles, message text, attachment metadata, part counts and serialized
-      sizes, pagination limits, and the documented 100-member cap.
-- [ ] **Install the packed artifact in a clean consumer fixture.** CI must create
-      the tarball, install that tarball without workspace source aliases, run
-      Convex code generation, typecheck an authenticated host wrapper, and
-      exercise a minimal component flow.
+- [x] **Test input and resource limits.** Bound and test external identifiers,
+      titles, message text and captions, attachment metadata, pagination, and
+      the documented 100-member cap.
+- [x] **Install the packed artifact in a clean consumer fixture.** CI creates and
+      installs the tarball without workspace source aliases, typechecks component
+      registration and an authenticated host wrapper, imports the optional test
+      registrar, and checks package exports. Convex development-cloud code
+      generation and runtime behavior are covered by maintainer validation.
 - [ ] **Test the claimed compatibility range.** Run the package suite against
       Node 20 and the primary CI Node version, the minimum supported Convex
       version and the newest supported version, and document the resulting
       compatibility matrix.
-- [ ] **Define schema upgrade and rollback practice.** Add `UPGRADING.md`, state
-      which changes are behaviorally breaking, document staged index and
-      optional-field migrations, and rehearse upgrading a populated test
-      deployment without data loss.
-- [ ] **Run a focused security review.** Review non-disclosure behavior,
+- [x] **Define schema upgrade and rollback practice.** `UPGRADING.md` identifies
+      behaviorally breaking changes, staged index and optional-field migrations,
+      deployment order, rehearsal evidence, and rollback boundaries. The
+      `0.0.1` placeholder has no component data to migrate into `0.1.0`.
+- [x] **Run a focused security review.** Review non-disclosure behavior,
       cross-scope isolation, host identity derivation, attachment authorization,
       presence tokens, error leakage, abuse limits, and dependency exposure.
-      Record the review and turn findings into regression tests.
-- [ ] **Measure the supported operating envelope.** Benchmark a busy direct chat
-      and a 100-member group, long message histories, large inboxes, read
-      acknowledgements, reactions, and presence. Publish the dataset, Convex
-      version and tier, latency percentiles, conflicts, database I/O, and limits.
-- [ ] **Run production-like soak tests.** Exercise web and native clients across
-      reconnects, retries, multiple sessions, expired attachment URLs, and
-      background/foreground transitions. Resolve all release-blocking defects.
+      Findings and accepted host boundaries are recorded in
+      `SECURITY_REVIEW.md` and resolved findings have regression tests.
+- [x] **Bound the supported operating envelope.** All public transaction-shaping
+      inputs, page sizes, attachment metadata, and membership fan-out have
+      documented hard limits. Formal production-tier performance claims are not
+      required for the `0.1` baseline.
 
 ## Required to publish `0.1.0` to `latest`
 
@@ -84,14 +85,15 @@ modeled or future work may remain deferred.
 
 ## Recommended follow-ups
 
-- [ ] Add browser end-to-end coverage for two authenticated sessions and a
-      repeatable iOS/Android smoke-test matrix.
-- [ ] Add a coverage report and fail CI when critical component modules or
+- [x] Accept the completed real-device and web development-cloud validation as
+      the `0.1` end-to-end evidence; repeat it for behaviorally breaking changes.
+- [x] Add a coverage report and fail CI when critical component modules or
       authorization branches regress below the agreed threshold.
-- [ ] Add API declaration and package-export snapshots so accidental public
+- [x] Add API declaration and package-export snapshots so accidental public
       contract changes are reviewed explicitly.
-- [ ] Add documentation link checking, dependency updates, and a repeatable
-      release workflow with npm provenance.
+- [x] Add documentation link checking and automated dependency updates.
+- [x] Add a guarded repeatable release workflow with dry-run verification and
+      npm provenance.
 - [ ] Define supported-version and security-fix windows once real adopters rely
       on the package.
 

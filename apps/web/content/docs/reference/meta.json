@@ -3,6 +3,7 @@
   "icon": "Braces",
   "pages": [
     "host-api",
+    "supported-contract",
     "release-readiness",
     "roadmap",
     "convex-chat-v0.1-prd",

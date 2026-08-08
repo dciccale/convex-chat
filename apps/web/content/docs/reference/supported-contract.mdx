@@ -1,0 +1,119 @@
+---
+title: Supported contract
+description: The public behavior and compatibility boundary targeted by convex-chat 0.1.
+icon: FileCheck
+---
+
+This page freezes the supported `0.1` baseline. The package exports, generated
+TypeScript declarations, validators, tests, and changelog remain authoritative
+for an exact release.
+
+## Package surface
+
+The supported package entry points are:
+
+- `convex-chat` for `exposeChatApi`, `ChatAttachment`, and host context types;
+- `convex-chat/convex.config.js` for component registration;
+- `convex-chat/test` for registering the component with `convex-test`; and
+- `convex-chat/_generated/component.js` for generated component types.
+
+The API snapshot in `packages/convex-chat/api-snapshot.json` makes additions,
+removals, and renamed host helpers explicit during review. Internal files under
+`src/component` and `dist/component` are implementation details unless exposed
+through one of the entry points above.
+
+## Authority boundary
+
+Conversation creation is a trusted system operation. A host must authenticate
+the caller, derive `scopeId` and `subjectId` from trusted data, apply relationship
+and product policy, and only then call the component. It must never expose the
+raw creation mutation or actor identifiers directly to an untrusted client.
+
+Every actor operation repeats chat-local authorization inside the component.
+An active `read_write` membership may read and write. An active `read_only`
+membership may read, acknowledge read state, and participate in non-writing
+presence operations. A membership with `none` access, an inactive membership,
+or a non-member receives the same not-found behavior and cannot discover the
+conversation.
+
+Scopes are isolated. Reusing a subject identifier in another scope does not
+grant access, and host table identifiers remain opaque strings.
+
+## Conversation behavior
+
+- Direct conversations contain exactly two distinct subjects.
+- Groups initially contain between two and 100 subjects.
+- An external key is idempotent within a scope. Reusing it with a different
+  kind, normalized title, or active member set returns
+  `IDEMPOTENCY_CONFLICT`.
+- Membership roles and lifecycle states present in the schema are modeled
+  groundwork. There is no supported invite, leave, remove, role-change,
+  ownership-transfer, archive, or deletion workflow in `0.1`.
+- Conversation listing returns at most 100 summaries, ordered by inbox activity.
+
+## Message behavior
+
+- A conversation allocates strictly increasing sequence numbers transactionally.
+- `clientMessageId` is idempotent per conversation and author. Reusing it with
+  different parts or a different reply target returns
+  `IDEMPOTENCY_CONFLICT`.
+- Message pages contain at most 100 items in ascending sequence order. Without
+  `beforeSequence`, the page contains the newest items. Passing the first
+  sequence of an existing page as `beforeSequence` loads the next older page
+  without overlap when new messages arrive.
+- A member only sees messages at or after its `historyStartsAtSequence`.
+- Read watermarks only move forward; reading implies delivery and querying does
+  not acknowledge either state.
+- Only the author can edit or delete a message. Both operations require the
+  expected revision.
+- Delete-for-everyone retains the message identity and ordering but removes its
+  parts and reactions. It returns attachment storage keys so the host can clean
+  up external bytes.
+- A reply owns a bounded quote snapshot. If its source is edited, the snapshot
+  remains unchanged. If the source is deleted, the reply keeps the bounded
+  quote text, is marked `sourceDeleted`, and cannot navigate to source content.
+- Each member has at most one allowlisted reaction on a published message.
+
+## Presence behavior
+
+Online presence is scope-wide for active chat participants. Typing is
+conversation-scoped and requires write access. Presence session and room tokens
+are short-lived bearer capabilities produced by the Presence child component;
+clients and hosts must not log or share them.
+
+Presence communicates ephemeral availability, not durable delivery or read
+receipts. Product privacy controls and whether presence is exposed at all remain
+host decisions.
+
+## Input and resource limits
+
+| Input                                                |              Limit |
+| ---------------------------------------------------- | -----------------: |
+| Scope, subject, client-message, and part identifiers |    200 code points |
+| Conversation title                                   |    200 code points |
+| External conversation key                            |    500 code points |
+| Conversation members                                 |                100 |
+| Text message or caption                              | 10,000 code points |
+| Page size                                            |                100 |
+| Attachment size                                      |             25 MiB |
+| Storage provider                                     |    100 code points |
+| Storage key                                          |  1,024 code points |
+| Media type                                           |    255 code points |
+| Filename                                             |    240 code points |
+| Attachment fallback                                  |    500 code points |
+| Attachment width or height                           |            100,000 |
+| Attachment duration                                  |           24 hours |
+
+Hosts may impose smaller limits for their storage provider, product, or abuse
+policy. The component limits protect transaction shape; they are not upload
+authorization or rate limiting.
+
+## Stable error codes
+
+The component uses `ConvexError` data with these codes:
+`CHAT_NOT_FOUND`, `INVALID_ARGUMENT`, `READ_ONLY`, `IDEMPOTENCY_CONFLICT`,
+`REVISION_CONFLICT`, and `NOT_ALLOWED`. Messages are useful for development but
+hosts should branch on codes rather than matching English text.
+
+Pre-1.0 releases may still make breaking changes, but every change to this page
+requires a changelog entry and upgrade guidance.

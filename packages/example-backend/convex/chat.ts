@@ -34,16 +34,22 @@ export const ensureDemo = mutation({
 });
 
 export const listConversations = query({
-  args: { subjectId: demoSubject },
-  handler: async (ctx, { subjectId }) =>
+  args: { subjectId: demoSubject, limit: v.optional(v.number()) },
+  handler: async (ctx, { subjectId, limit }) =>
     ctx.runQuery(components.chat.conversations.list, {
       scopeId: DEMO_SCOPE,
       subjectId,
+      limit,
     }),
 });
 
 export const listMessages = query({
-  args: { subjectId: demoSubject, conversationId: v.string() },
+  args: {
+    subjectId: demoSubject,
+    conversationId: v.string(),
+    beforeSequence: v.optional(v.number()),
+    limit: v.optional(v.number()),
+  },
   handler: async (ctx, args) =>
     ctx.runQuery(components.chat.messages.list, {
       scopeId: DEMO_SCOPE,

@@ -29,6 +29,7 @@
     "dist",
     "src",
     "!src/**/*.test.*",
+    "!src/component/_test/**",
     "!src/component/test.setup.ts"
   ],
   "main": "./dist/client/index.js",
@@ -58,20 +59,33 @@
   "scripts": {
     "build": "pnpm clean && tsc6 -p tsconfig.build.json",
     "build:codegen": "cd ../example-backend && convex codegen --component-dir ../convex-chat/src/component --typecheck disable && cd ../convex-chat && pnpm build",
+    "check:api": "pnpm build && node scripts/check-api-snapshot.mjs",
     "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
     "dev": "tsc6 -p tsconfig.build.json --watch",
     "prepack": "pnpm build",
     "prepublishOnly": "node scripts/check-publish-tag.mjs",
     "publish:next": "npm publish --tag next",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "tsc6 --noEmit"
   },
   "peerDependencies": {
-    "convex": "^1.43.0"
+    "convex": "^1.43.0",
+    "convex-test": ">=0.0.49",
+    "vite": ">=7.0.0 <9.0.0"
+  },
+  "peerDependenciesMeta": {
+    "convex-test": {
+      "optional": true
+    },
+    "vite": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@edge-runtime/vm": "^5.0.0",
     "@types/node": "^24.12.2",
+    "@vitest/coverage-v8": "4.1.4",
     "convex": "1.43.0",
     "convex-test": "0.0.49",
     "react": "19.2.3",

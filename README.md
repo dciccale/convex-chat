@@ -187,6 +187,10 @@ The current feature boundary and prioritized roadmap are documented in
 [`apps/web/content/docs/reference/roadmap.mdx`](apps/web/content/docs/reference/roadmap.mdx).
 The concrete criteria for removing the alpha label are tracked in the
 [`release-readiness checklist`](apps/web/content/docs/reference/release-readiness.mdx).
+Upgrade and schema rollout practices are documented in
+[`UPGRADING.md`](UPGRADING.md).
+The frozen `0.1` behavior and package boundary are documented in the
+[`supported contract`](apps/web/content/docs/reference/supported-contract.mdx).
 
 ## Development
 
@@ -202,6 +206,7 @@ pnpm --filter convex-chat pack --pack-destination /tmp
 Contributions are welcome. Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) and
 our [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) before opening a pull request.
 Report security issues privately as described in [`SECURITY.md`](SECURITY.md).
+Maintainer releases follow [`RELEASING.md`](RELEASING.md).
 
 ## License
 

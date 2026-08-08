@@ -2,6 +2,14 @@ import { v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel.js";
 import type { MutationCtx, QueryCtx } from "./_generated/server.js";
 import { mutation, query } from "./_generated/server.js";
+import {
+  CHAT_LIMITS,
+  codePointLength,
+  normalizePageSize,
+  validateBoundedString,
+  validateIdentifier,
+  validateOptionalPositiveInteger,
+} from "./limits.js";
 import { chatError, previewText, requireMembership } from "./model.js";
 import { attachmentDescriptor, messagePart } from "./validators.js";
 
@@ -103,7 +111,16 @@ export const list = query({
   returns: v.array(publicMessage),
   handler: async (ctx, args) => {
     const { conversationId, membership } = await requireMembership(ctx, args);
-    const limit = Math.max(1, Math.min(args.limit ?? 50, 100));
+    const limit = normalizePageSize(args.limit);
+    if (
+      args.beforeSequence !== undefined &&
+      (!Number.isSafeInteger(args.beforeSequence) || args.beforeSequence < 1)
+    ) {
+      chatError(
+        "INVALID_ARGUMENT",
+        "beforeSequence must be a positive integer",
+      );
+    }
     const messages = await ctx.db
       .query("messages")
       .withIndex("conversation_sequence", (q) => {
@@ -143,6 +160,7 @@ export const editOwnTextPart = mutation({
   },
   returns: publicMessage,
   handler: async (ctx, args) => {
+    validateBoundedString(args.partId, "partId", 200);
     const { message, conversation, membership } = await requireMessage(
       ctx,
       args,
@@ -328,6 +346,7 @@ export const getAttachment = query({
     filename: v.string(),
   }),
   handler: async (ctx, args) => {
+    validateBoundedString(args.partId, "partId", 200);
     const { message } = await requireMessage(ctx, args, false);
     if (message.status !== "published") {
       chatError("CHAT_NOT_FOUND", "Attachment not found");
@@ -370,6 +389,9 @@ export const markReadThrough = mutation({
   },
   returns: v.object({ sequence: v.number(), unreadOrdinal: v.number() }),
   handler: async (ctx, args) => {
+    if (!Number.isSafeInteger(args.sequence) || args.sequence < 0) {
+      chatError("INVALID_ARGUMENT", "sequence must be a non-negative integer");
+    }
     const { conversation, conversationId, membership } =
       await requireMembership(ctx, args);
     const sequence = Math.max(
@@ -434,7 +456,13 @@ async function insertMessage(
     )
     .unique();
   if (existing) {
-    if (stableStringify(existing.parts) !== stableStringify(args.parts)) {
+    const existingReplyId = existing.replyToMessageId
+      ? String(existing.replyToMessageId)
+      : undefined;
+    if (
+      stableStringify(existing.parts) !== stableStringify(args.parts) ||
+      existingReplyId !== args.replyToMessageId
+    ) {
       chatError(
         "IDEMPOTENCY_CONFLICT",
         "clientMessageId was already used for a different message",
@@ -658,19 +686,14 @@ async function getReactionSummary(
 }
 
 function validateText(text: string) {
-  const codePoints = [...text].length;
-  if (codePoints === 0 || codePoints > 10_000) {
+  const codePoints = codePointLength(text);
+  if (codePoints === 0 || codePoints > CHAT_LIMITS.messageCodePoints) {
     chatError("INVALID_ARGUMENT", "Text must contain 1 to 10,000 code points");
   }
 }
 
 function validateClientMessageId(clientMessageId: string) {
-  if (!clientMessageId || clientMessageId.length > 200) {
-    chatError(
-      "INVALID_ARGUMENT",
-      "clientMessageId must contain 1 to 200 characters",
-    );
-  }
+  validateIdentifier(clientMessageId, "clientMessageId");
 }
 
 function validateAttachment(attachment: {
@@ -679,20 +702,58 @@ function validateAttachment(attachment: {
   mediaType: string;
   filename: string;
   size: number;
+  width?: number;
+  height?: number;
+  durationMs?: number;
   fallbackText: string;
 }) {
   if (
-    !attachment.storageProvider ||
-    !attachment.storageKey ||
-    !attachment.mediaType ||
-    !attachment.filename ||
-    !attachment.fallbackText ||
     !Number.isSafeInteger(attachment.size) ||
     attachment.size <= 0 ||
-    attachment.size > 25 * 1024 * 1024
+    attachment.size > CHAT_LIMITS.attachmentBytes
   ) {
     chatError("INVALID_ARGUMENT", "Invalid attachment metadata");
   }
+  validateBoundedString(
+    attachment.storageProvider,
+    "storageProvider",
+    CHAT_LIMITS.storageProviderCodePoints,
+  );
+  validateBoundedString(
+    attachment.storageKey,
+    "storageKey",
+    CHAT_LIMITS.storageKeyCodePoints,
+  );
+  validateBoundedString(
+    attachment.mediaType,
+    "mediaType",
+    CHAT_LIMITS.mediaTypeCodePoints,
+  );
+  validateBoundedString(
+    attachment.filename,
+    "filename",
+    CHAT_LIMITS.filenameCodePoints,
+  );
+  validateBoundedString(
+    attachment.fallbackText,
+    "fallbackText",
+    CHAT_LIMITS.attachmentFallbackCodePoints,
+  );
+  validateOptionalPositiveInteger(
+    attachment.width,
+    "width",
+    CHAT_LIMITS.attachmentDimension,
+  );
+  validateOptionalPositiveInteger(
+    attachment.height,
+    "height",
+    CHAT_LIMITS.attachmentDimension,
+  );
+  validateOptionalPositiveInteger(
+    attachment.durationMs,
+    "durationMs",
+    CHAT_LIMITS.attachmentDurationMs,
+  );
 }
 
 function stableStringify(value: unknown): string {
