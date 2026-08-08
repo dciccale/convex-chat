@@ -1,0 +1,25 @@
+{
+  "name": "@convex-chat/example-backend",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./api": {
+      "types": "./convex/_generated/api.d.ts",
+      "default": "./convex/_generated/api.js"
+    }
+  },
+  "scripts": {
+    "convex:dev": "convex dev --typecheck-components",
+    "convex:once": "convex dev --once --typecheck-components",
+    "typecheck": "tsc --noEmit -p convex/tsconfig.json"
+  },
+  "dependencies": {
+    "@convex-dev/r2": "0.10.2",
+    "convex": "1.43.0",
+    "convex-chat": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
+}

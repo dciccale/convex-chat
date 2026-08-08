@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import fixWebmDuration from "fix-webm-duration";
 
 export const MAX_AUDIO_DURATION_MS = 2 * 60_000;
 
 const preferredAudioTypes = [
-  "audio/webm;codecs=opus",
   "audio/mp4;codecs=mp4a.40.2",
+  "audio/webm;codecs=opus",
   "audio/ogg;codecs=opus",
   "audio/webm",
   "audio/mp4",
@@ -133,8 +134,10 @@ export function useAudioRecorder({
         setElapsedMs(0);
         setStatus("idle");
         if (!cancelled && audio.size > 0) {
-          void onRecordedRef
-            .current(audio, durationMs)
+          void prepareRecordedAudio(audio, durationMs)
+            .then((preparedAudio) =>
+              onRecordedRef.current(preparedAudio, durationMs),
+            )
             .catch((cause) => onErrorRef.current(cause));
         }
       });
@@ -182,6 +185,15 @@ export function audioFileExtension(mediaType: string) {
   if (baseMediaType === "audio/mp4") return "m4a";
   if (baseMediaType === "audio/ogg") return "ogg";
   return "webm";
+}
+
+async function prepareRecordedAudio(audio: Blob, durationMs: number) {
+  if (!audio.type.toLowerCase().startsWith("audio/webm")) return audio;
+
+  // Chromium MediaRecorder WebM files commonly omit container duration.
+  // Browsers tolerate that, but Android's native player reports a zero-length
+  // source and will not start it. Add the metadata before sharing the file.
+  return fixWebmDuration(audio, durationMs, { logger: false });
 }
 
 export function formatRecordingDuration(durationMs: number) {

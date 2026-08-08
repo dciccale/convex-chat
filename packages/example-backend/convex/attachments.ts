@@ -89,17 +89,27 @@ export const commitAttachment = action({
     }
     const mediaKind = attachmentKind(metadata.contentType);
     const maxBytes = mediaKind === "image" ? MAX_IMAGE_BYTES : MAX_AUDIO_BYTES;
-    if (
-      !mediaKind ||
-      metadata.size > maxBytes ||
-      metadata.size !== grant.declaredSize ||
-      metadata.contentType !== grant.declaredMediaType ||
-      (mediaKind === "audio" && !grant.declaredDurationMs) ||
-      (mediaKind === "image" && grant.declaredDurationMs !== undefined)
-    ) {
+    const mismatchReasons = [
+      !mediaKind ? "unsupported media type" : null,
+      metadata.size > maxBytes ? "file exceeds size limit" : null,
+      metadata.size !== grant.declaredSize
+        ? `size ${metadata.size} != ${grant.declaredSize}`
+        : null,
+      canonicalMediaType(metadata.contentType) !==
+      canonicalMediaType(grant.declaredMediaType)
+        ? `type ${metadata.contentType} != ${grant.declaredMediaType}`
+        : null,
+      mediaKind === "audio" && !grant.declaredDurationMs
+        ? "audio duration is missing"
+        : null,
+      mediaKind === "image" && grant.declaredDurationMs !== undefined
+        ? "image has an audio duration"
+        : null,
+    ].filter((reason): reason is string => reason !== null);
+    if (mismatchReasons.length > 0) {
       await storage.deleteObject(ctx, grant.storageKey);
       throw new Error(
-        "Uploaded object does not match the authorized attachment",
+        `Uploaded object does not match the authorized attachment (${mismatchReasons.join(", ")})`,
       );
     }
     const message: { id: string } = await ctx.runMutation(
@@ -138,12 +148,18 @@ export const getAttachmentUrl = query({
     subjectId: demoSubject,
     messageId: v.string(),
     partId: v.string(),
+    urlVersion: v.optional(v.number()),
   },
   returns: v.union(v.string(), v.null()),
   handler: async (ctx, args) => {
     const attachment = await ctx.runQuery(
       components.chat.messages.getAttachment,
-      { scopeId: DEMO_SCOPE, ...args },
+      {
+        scopeId: DEMO_SCOPE,
+        subjectId: args.subjectId,
+        messageId: args.messageId,
+        partId: args.partId,
+      },
     );
     if (attachment.storageProvider !== STORAGE_PROVIDER) return null;
     return storage.getUrl(attachment.storageKey, { expiresIn: 5 * 60 });
@@ -234,12 +250,33 @@ function validateAttachment(args: {
 }
 
 function attachmentKind(mediaType: string): "image" | "audio" | null {
-  if (mediaType.startsWith("image/")) return "image";
-  const baseMediaType = mediaType.split(";", 1)[0]?.trim().toLowerCase();
-  if (["audio/webm", "audio/mp4", "audio/ogg"].includes(baseMediaType)) {
+  if (baseMediaType(mediaType).startsWith("image/")) return "image";
+  const normalizedMediaType = baseMediaType(mediaType);
+  if (
+    [
+      "audio/webm",
+      "audio/mp4",
+      "audio/m4a",
+      "audio/x-m4a",
+      "audio/aac",
+      "audio/ogg",
+    ].includes(normalizedMediaType)
+  ) {
     return "audio";
   }
   return null;
+}
+
+function baseMediaType(mediaType: string) {
+  return mediaType.split(";", 1)[0]?.trim().toLowerCase() ?? "";
+}
+
+function canonicalMediaType(mediaType: string) {
+  const normalized = baseMediaType(mediaType);
+  if (normalized === "audio/m4a" || normalized === "audio/x-m4a") {
+    return "audio/mp4";
+  }
+  return normalized;
 }
 
 function formatDuration(durationMs: number) {

@@ -31,7 +31,8 @@ policy.
 - Allowlisted reactions
 - Online presence and typing indicators
 - Provider-neutral attachment descriptors with a direct Cloudflare R2 example
-- A responsive Next.js example with a deliberately fake identity switcher
+- Next.js and Expo/React Native examples with a deliberately fake identity
+  switcher
 
 ## How it fits together
 
@@ -54,11 +55,13 @@ component boundary as opaque strings.
 
 ## Workspace
 
-| Path                   | Purpose                                       |
-| ---------------------- | --------------------------------------------- |
-| `packages/convex-chat` | Publishable Convex component and host helpers |
-| `apps/example`         | Runnable Next.js and Convex example           |
-| `apps/web`             | Marketing website and Fumadocs documentation  |
+| Path                       | Purpose                                         |
+| -------------------------- | ----------------------------------------------- |
+| `packages/convex-chat`     | Publishable Convex component and host helpers   |
+| `packages/example-backend` | Shared private Convex backend for both examples |
+| `apps/example`             | Runnable Next.js browser example                |
+| `apps/example-native`      | Runnable Expo and React Native mobile example   |
+| `apps/web`                 | Marketing website and Fumadocs documentation    |
 
 ## Run the example
 
@@ -71,15 +74,40 @@ pnpm --filter convex-chat build:codegen
 pnpm convex:dev
 ```
 
-Keep the Convex process running, then start the frontend in another terminal:
+Keep the Convex process running. After the first CLI setup, copy its public
+`CONVEX_URL` value into the two ignored frontend environment files:
+
+```dotenv
+# apps/example/.env.local
+NEXT_PUBLIC_CONVEX_URL=https://your-development-deployment.convex.cloud
+
+# apps/example-native/.env.local
+EXPO_PUBLIC_CONVEX_URL=https://your-development-deployment.convex.cloud
+```
+
+Then start the browser frontend in another terminal:
 
 ```sh
 pnpm dev:example
 ```
 
 Open [http://localhost:3001](http://localhost:3001). On first use, the Convex
-CLI will ask you to select or create a project and will write the deployment
-settings to the ignored `apps/example/.env.local` file.
+CLI asks you to select or create a project and writes deployment settings to
+the ignored `packages/example-backend/.env.local` file.
+
+To run the native client, start Metro in another terminal and scan its QR code
+with Expo Go:
+
+```sh
+pnpm dev:example-native
+```
+
+The phone and development machine should normally share a network. If LAN
+discovery is blocked, use
+`pnpm --filter @convex-chat/example-native start --tunnel`. Select different
+demo identities in the browser and phone to test realtime chat through the
+same Convex deployment. Text, images, audio playback, and press-and-hold voice
+recording work in Expo Go; no custom native build is required for this example.
 
 The marketing and documentation site runs separately on
 [http://localhost:3000](http://localhost:3000):
@@ -113,8 +141,9 @@ the generated component API.
 
 Conversation creation should stay in host-controlled mutations, after your
 application has checked its own relationship and policy rules. See
-[`apps/example/convex/chat.ts`](apps/example/convex/chat.ts) for a compact integration
-example and [`packages/convex-chat/README.md`](packages/convex-chat/README.md)
+[`packages/example-backend/convex/chat.ts`](packages/example-backend/convex/chat.ts)
+for a compact integration example and
+[`packages/convex-chat/README.md`](packages/convex-chat/README.md)
 for package-specific setup.
 
 ## Attachments

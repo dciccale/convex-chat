@@ -5,11 +5,18 @@
   "engines": {
     "node": ">=20"
   },
+  "pnpm": {
+    "overrides": {
+      "react": "19.2.3",
+      "react-dom": "19.2.3"
+    }
+  },
   "scripts": {
     "build": "turbo build",
-    "convex:dev": "pnpm --filter @convex-chat/example convex:dev",
+    "convex:dev": "pnpm --filter @convex-chat/example-backend convex:dev",
     "dev": "turbo dev",
     "dev:example": "pnpm --filter @convex-chat/example dev",
+    "dev:example-native": "pnpm --filter @convex-chat/example-native start",
     "dev:web": "pnpm --filter @convex-chat/web dev",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

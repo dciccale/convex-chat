@@ -3,7 +3,7 @@
 import { useConvex, useMutation, useQuery } from "convex/react";
 import { getFunctionName } from "convex/server";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { api } from "../convex/_generated/api";
+import { api } from "@convex-chat/example-backend/api";
 import type { Subject } from "./subjects";
 
 const HEARTBEAT_INTERVAL = 10_000;

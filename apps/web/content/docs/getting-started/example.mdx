@@ -1,16 +1,19 @@
 ---
-title: Run the example
-description: Launch the included Next.js and Convex chat application locally.
+title: Run the examples
+description: Launch the included Next.js and Expo clients against one Convex backend.
 icon: Play
 ---
 
-The example demonstrates direct and group conversations, unread state, replies, edits, reactions, image and voice attachments, online presence, and typing indicators.
+The browser and native examples demonstrate direct and group conversations,
+unread state, replies, edits, reactions, image and voice attachments, online
+presence, and typing indicators through one shared Convex deployment.
 
 ## Requirements
 
 - Node.js 20 or newer
 - pnpm 10
 - A Convex account and development deployment
+- Expo Go on a phone for the native client
 
 ## Start Convex
 
@@ -18,6 +21,17 @@ The example demonstrates direct and group conversations, unread state, replies, 
 pnpm install
 pnpm --filter convex-chat build:codegen
 pnpm convex:dev
+```
+
+After first-time Convex setup, manually copy its public `CONVEX_URL` into each
+client's ignored environment file:
+
+```dotenv
+# apps/example/.env.local
+NEXT_PUBLIC_CONVEX_URL=https://your-development-deployment.convex.cloud
+
+# apps/example-native/.env.local
+EXPO_PUBLIC_CONVEX_URL=https://your-development-deployment.convex.cloud
 ```
 
 ## Start Next.js
@@ -28,7 +42,26 @@ In a second terminal:
 pnpm dev:example
 ```
 
-Open [http://localhost:3001](http://localhost:3001). Convex writes the ignored deployment settings to `apps/example/.env.local`.
+Open [http://localhost:3001](http://localhost:3001). Convex keeps the ignored
+deployment settings in `packages/example-backend/.env.local`.
+
+## Start Expo
+
+In another terminal:
+
+```bash
+pnpm dev:example-native
+```
+
+Scan the QR code with Expo Go. Keep the phone and development machine on the
+same network, or run
+`pnpm --filter @convex-chat/example-native start --tunnel` when LAN discovery
+is unavailable. Select Alice in the browser and Bob on the phone to test both
+clients together.
+
+The example uses Expo Go-compatible modules, including `expo-audio`, so image
+selection, audio playback, and press-and-hold voice recording do not require a
+custom development build.
 
 <Callout type="warn" title="Demo identity only">
   The Alice, Bob, and Charlie switcher is intentionally insecure. Production

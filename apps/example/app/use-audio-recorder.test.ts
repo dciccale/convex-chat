@@ -14,6 +14,10 @@ describe("audio recording helpers", () => {
     ).toBe("audio/mp4;codecs=mp4a.40.2");
   });
 
+  it("prefers MP4 when a browser supports both native-friendly formats", () => {
+    expect(selectAudioMimeType(() => true)).toBe("audio/mp4;codecs=mp4a.40.2");
+  });
+
   it("rejects recording when no preferred format is supported", () => {
     expect(selectAudioMimeType(() => false)).toBeUndefined();
   });

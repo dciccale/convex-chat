@@ -16,15 +16,29 @@ pnpm typecheck
 pnpm test
 ```
 
-To run the example, start Convex and Next.js in separate terminals:
+To run the examples, start their shared Convex backend first:
 
 ```sh
 pnpm --filter convex-chat build:codegen
 pnpm convex:dev
 ```
 
+After first-time Convex setup, manually add its public `CONVEX_URL` to each
+client's ignored environment file:
+
+```dotenv
+# apps/example/.env.local
+NEXT_PUBLIC_CONVEX_URL=https://your-development-deployment.convex.cloud
+
+# apps/example-native/.env.local
+EXPO_PUBLIC_CONVEX_URL=https://your-development-deployment.convex.cloud
+```
+
+Start either or both clients in separate terminals:
+
 ```sh
 pnpm --filter @convex-chat/example dev
+pnpm --filter @convex-chat/example-native start
 ```
 
 ## Project boundaries
@@ -37,8 +51,9 @@ operations must verify chat-local membership inside the component, even when a
 host wrapper has already authenticated the caller. Host table IDs cross the
 component boundary as opaque strings.
 
-The publishable package lives in `packages/convex-chat`; runnable examples and
-host integrations live in `apps`.
+The publishable package lives in `packages/convex-chat`; the private example
+host integration lives in `packages/example-backend`; runnable clients live in
+`apps`.
 
 ## Pull requests
 

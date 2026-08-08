@@ -14,7 +14,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useRef, useState } from "react";
-import { api } from "../convex/_generated/api";
+import { api } from "@convex-chat/example-backend/api";
 import { AudioPlayer } from "@/components/audio-player";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";

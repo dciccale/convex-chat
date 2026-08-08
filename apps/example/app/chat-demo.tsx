@@ -21,7 +21,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { api } from "../convex/_generated/api";
+import { api } from "@convex-chat/example-backend/api";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";

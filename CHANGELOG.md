@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Fix voice-message uploads and slide-to-cancel gestures in the Expo native
+  example, and show concise user-facing errors instead of Convex stack traces.
+
+- Add a full Expo and React Native chat example with an inbox-only home screen,
+  native keyboard handling, message selection and reactions, reply and edit
+  flows, image attachments, and press-and-hold voice messages that send on
+  release.
+- Extract the demo Convex host into a private shared backend package so the
+  Next.js and Expo clients use one generated API and deployment.
+
 ## 0.1.0-alpha.0 - 2026-08-08
 
 - Link the live demo and documentation from the repository and package READMEs,

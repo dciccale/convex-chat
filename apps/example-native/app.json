@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "convex-chat native example",
+    "slug": "convex-chat-example-native",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "convex-chat-example",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": [
+      "expo-router",
+      "expo-asset",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Allow the convex-chat example to record voice messages.",
+          "enableBackgroundPlayback": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow the convex-chat example to choose images for messages.",
+          "cameraPermission": false,
+          "microphonePermission": "Allow the convex-chat example to record voice messages."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
