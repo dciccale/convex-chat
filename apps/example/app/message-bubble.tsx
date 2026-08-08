@@ -70,6 +70,12 @@ export function MessageBubble({
     .filter((part) => part.type === "text")
     .map((part) => (part.type === "text" ? part.text : ""))
     .join("\n");
+  const hasImage =
+    message.status === "published" &&
+    message.parts.some(
+      (part) =>
+        part.type === "attachment" && part.mediaType.startsWith("image/"),
+    );
 
   async function copyText() {
     if (text) await navigator.clipboard.writeText(text);
@@ -87,7 +93,7 @@ export function MessageBubble({
       )}
       <div className="message-stack">
         <article
-          className={`message ${mine ? "mine" : ""} ${message.status === "redacted" ? "deleted" : ""}`}
+          className={`message ${mine ? "mine" : ""} ${hasImage ? "image-message" : ""} ${message.status === "redacted" ? "deleted" : ""}`}
           onContextMenu={(event) => {
             event.preventDefault();
             setMenuOpen(true);
@@ -309,11 +315,14 @@ function Attachment({
     partId,
   });
 
-  if (!url) {
+  if (url === undefined) {
+    return <AttachmentPlaceholder mediaType={mediaType} />;
+  }
+  if (url === null) {
     return (
-      <div className="attachment-placeholder">
-        <Skeleton className="attachment-skeleton" />
-        <Skeleton className="attachment-skeleton-line" />
+      <div className="attachment-unavailable">
+        <FileText />
+        <span>{fallbackText} is unavailable</span>
       </div>
     );
   }
@@ -346,6 +355,47 @@ function Attachment({
   );
 }
 
+function AttachmentPlaceholder({ mediaType }: { mediaType: string }) {
+  if (mediaType.startsWith("image/")) {
+    return (
+      <div
+        className="attachment-placeholder image"
+        role="status"
+        aria-label="Loading image"
+      >
+        <Skeleton className="attachment-skeleton" />
+      </div>
+    );
+  }
+
+  if (mediaType.startsWith("audio/")) {
+    return (
+      <div
+        className="attachment-placeholder audio"
+        role="status"
+        aria-label="Loading voice message"
+      >
+        <Skeleton className="attachment-skeleton-audio-button" />
+        <div className="attachment-skeleton-audio-track">
+          <Skeleton className="attachment-skeleton-audio-label" />
+          <Skeleton className="attachment-skeleton-audio-line" />
+          <Skeleton className="attachment-skeleton-audio-time" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="attachment-placeholder file"
+      role="status"
+      aria-label="Loading attachment"
+    >
+      <Skeleton className="attachment-skeleton-line" />
+    </div>
+  );
+}
+
 function ImageAttachment({
   fallbackText,
   message,
@@ -361,6 +411,9 @@ function ImageAttachment({
 }) {
   const [open, setOpen] = useState(false);
   const [showReactions, setShowReactions] = useState(false);
+  const [loadState, setLoadState] = useState<"loading" | "loaded" | "error">(
+    "loading",
+  );
   const replyAfterClose = useRef(false);
 
   function closeAndReply() {
@@ -381,8 +434,30 @@ function ImageAttachment({
           className="message-image-trigger"
           type="button"
           aria-label={`Open ${fallbackText}`}
+          disabled={loadState !== "loaded"}
         >
-          <img className="message-image" src={url} alt={fallbackText} />
+          {loadState === "loading" && (
+            <div className="message-image-loading" aria-hidden="true">
+              <Skeleton />
+            </div>
+          )}
+          {loadState === "error" && (
+            <span className="message-image-error">Image unavailable</span>
+          )}
+          <img
+            className={`message-image ${loadState === "loaded" ? "loaded" : ""}`}
+            src={url}
+            alt={fallbackText}
+            decoding="async"
+            onLoad={(event) => {
+              const image = event.currentTarget;
+              void image
+                .decode()
+                .catch(() => undefined)
+                .then(() => setLoadState("loaded"));
+            }}
+            onError={() => setLoadState("error")}
+          />
         </button>
       </DialogTrigger>
       <DialogContent

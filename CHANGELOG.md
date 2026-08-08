@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Keep web image bubbles fitted to their previews and replace attachment loading
+  flashes with stable image and voice-message placeholders.
 - Fix voice-message uploads and slide-to-cancel gestures in the Expo native
   example, and show concise user-facing errors instead of Convex stack traces.
 
