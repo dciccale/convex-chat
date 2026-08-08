@@ -3,6 +3,7 @@
 Authorization-aware chat primitives for [Convex](https://www.convex.dev/).
 
 [![CI](https://github.com/dciccale/convex-chat/actions/workflows/ci.yml/badge.svg)](https://github.com/dciccale/convex-chat/actions/workflows/ci.yml)
+[![Convex Component](https://www.convex.dev/components/badge/convex-chat)](https://www.convex.dev/components/convex-chat)
 [![Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![alpha](https://img.shields.io/badge/status-alpha-orange.svg)](CHANGELOG.md)
 
@@ -184,6 +185,8 @@ last release are tracked in [`CHANGELOG.md`](CHANGELOG.md).
 
 The current feature boundary and prioritized roadmap are documented in
 [`apps/web/content/docs/reference/roadmap.mdx`](apps/web/content/docs/reference/roadmap.mdx).
+The concrete criteria for removing the alpha label are tracked in the
+[`release-readiness checklist`](apps/web/content/docs/reference/release-readiness.mdx).
 
 ## Development
 

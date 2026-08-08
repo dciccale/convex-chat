@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add the Convex Components marketplace badge and document the release-readiness
+  checklist for moving beyond alpha.
+- Make clean workspace builds resolve the nested component test registrars'
+  `convex-test` types without relying on a warm Turbo cache.
 - Keep web image bubbles fitted to their previews and replace attachment loading
   flashes with stable image and voice-message placeholders.
 - Fix voice-message uploads and slide-to-cancel gestures in the Expo native

@@ -3,6 +3,7 @@
   "icon": "Braces",
   "pages": [
     "host-api",
+    "release-readiness",
     "roadmap",
     "convex-chat-v0.1-prd",
     "expo-react-native-example-prd"

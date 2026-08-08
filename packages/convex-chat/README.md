@@ -2,6 +2,8 @@
 
 Authorization-aware direct and small-group chat primitives for Convex.
 
+[![Convex Component](https://www.convex.dev/components/badge/convex-chat)](https://www.convex.dev/components/convex-chat)
+
 [Live demo](https://convex-chat.dev/) · [Documentation](https://convex-chat.dev/docs)
 
 > [!WARNING]

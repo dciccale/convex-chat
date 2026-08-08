@@ -1,0 +1,104 @@
+---
+title: Release readiness
+description: The maintained checklist for removing the alpha label from convex-chat.
+icon: BadgeCheck
+---
+
+This checklist defines what “out of alpha” means for the existing supported
+baseline. Marketplace approval is an important distribution milestone, but it
+does not replace compatibility, security, upgrade, or production-readiness
+evidence.
+
+The first target is a release candidate for `0.1.0`. New roadmap features do not
+block that release unless they are advertised as supported. Items described as
+modeled or future work may remain deferred.
+
+## Already in place
+
+- [x] Approved listing in the Convex Components marketplace.
+- [x] Public npm prerelease under the `next` tag with a guard against publishing
+      a prerelease to `latest`.
+- [x] CI runs formatting, tests, typechecking, production builds, and package
+      creation on pull requests and pushes to `main`.
+- [x] Public component functions declare argument and return validators.
+- [x] Host-authentication and component-membership boundaries are documented.
+- [x] Runnable Next.js and Expo examples cover the supported user flows.
+- [x] README, changelog, contribution guide, license, code of conduct, issue
+      templates, and private vulnerability-reporting policy are present.
+
+## Required before a release candidate
+
+- [ ] **Freeze the supported contract.** Review every public export, validator,
+      error code, schema field, and documented behavior. Remove unused modeled
+      state from the compatibility promise, and resolve conflicting semantics
+      such as whether a deleted reply source retains or hides its quote text.
+- [ ] **Complete the authorization and invariant test matrix.** Cover
+      `read_write`, `read_only`, `none`, inactive membership, cross-scope access,
+      direct/group creation constraints, revision conflicts, deletion,
+      attachments, reactions, and presence for every public operation.
+- [ ] **Add adversarial and concurrency tests.** Cover concurrent conversation
+      creation, sequence allocation, send retries, idempotency payload conflicts
+      including reply targets, monotonic read watermarks, reaction replacement,
+      and pagination while new messages arrive.
+- [ ] **Test input and resource limits.** Bound and test external identifiers,
+      titles, message text, attachment metadata, part counts and serialized
+      sizes, pagination limits, and the documented 100-member cap.
+- [ ] **Install the packed artifact in a clean consumer fixture.** CI must create
+      the tarball, install that tarball without workspace source aliases, run
+      Convex code generation, typecheck an authenticated host wrapper, and
+      exercise a minimal component flow.
+- [ ] **Test the claimed compatibility range.** Run the package suite against
+      Node 20 and the primary CI Node version, the minimum supported Convex
+      version and the newest supported version, and document the resulting
+      compatibility matrix.
+- [ ] **Define schema upgrade and rollback practice.** Add `UPGRADING.md`, state
+      which changes are behaviorally breaking, document staged index and
+      optional-field migrations, and rehearse upgrading a populated test
+      deployment without data loss.
+- [ ] **Run a focused security review.** Review non-disclosure behavior,
+      cross-scope isolation, host identity derivation, attachment authorization,
+      presence tokens, error leakage, abuse limits, and dependency exposure.
+      Record the review and turn findings into regression tests.
+- [ ] **Measure the supported operating envelope.** Benchmark a busy direct chat
+      and a 100-member group, long message histories, large inboxes, read
+      acknowledgements, reactions, and presence. Publish the dataset, Convex
+      version and tier, latency percentiles, conflicts, database I/O, and limits.
+- [ ] **Run production-like soak tests.** Exercise web and native clients across
+      reconnects, retries, multiple sessions, expired attachment URLs, and
+      background/foreground transitions. Resolve all release-blocking defects.
+
+## Required to publish `0.1.0` to `latest`
+
+- [ ] Cut at least one release candidate and give adopters a documented feedback
+      window with no unresolved critical or high-severity defects.
+- [ ] Verify the live documentation and examples against the exact release
+      candidate tarball, including a clean install from the documented commands.
+- [ ] Move every user-visible change into a dated changelog section and write
+      migration notes for every breaking API, data-model, or behavior change.
+- [ ] Run the full CI suite from a clean checkout, verify the tarball contents
+      and package exports, then create the version commit and Git tag.
+- [ ] Publish the non-prerelease version to npm, move the `latest` tag only after
+      verification, and smoke-test installation from the public registry.
+- [ ] Replace alpha wording and badges across the repository, package README,
+      website, documentation, security policy, and issue templates.
+
+## Recommended follow-ups
+
+- [ ] Add browser end-to-end coverage for two authenticated sessions and a
+      repeatable iOS/Android smoke-test matrix.
+- [ ] Add a coverage report and fail CI when critical component modules or
+      authorization branches regress below the agreed threshold.
+- [ ] Add API declaration and package-export snapshots so accidental public
+      contract changes are reviewed explicitly.
+- [ ] Add documentation link checking, dependency updates, and a repeatable
+      release workflow with npm provenance.
+- [ ] Define supported-version and security-fix windows once real adopters rely
+      on the package.
+
+## Explicitly not blockers
+
+The roadmap's group administration lifecycle, notification events, delivery
+receipts, notification preferences, search, mentions, pins, retention, polls,
+and other future messaging features are not required to remove the alpha label.
+They must remain accurately described as unavailable until their authorization,
+tests, documentation, and upgrade semantics are complete.
