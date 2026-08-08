@@ -50,10 +50,9 @@ modeled or future work may remain deferred.
       registration and an authenticated host wrapper, imports the optional test
       registrar, and checks package exports. Convex development-cloud code
       generation and runtime behavior are covered by maintainer validation.
-- [ ] **Test the claimed compatibility range.** Run the package suite against
-      Node 20 and the primary CI Node version, the minimum supported Convex
-      version and the newest supported version, and document the resulting
-      compatibility matrix.
+- [x] **Test the claimed compatibility range.** The packed-consumer suite passes
+      on Node 20 and 22 against Convex `1.43.0` and the current npm `latest`
+      release in the committed CI matrix.
 - [x] **Define schema upgrade and rollback practice.** `UPGRADING.md` identifies
       behaviorally breaking changes, staged index and optional-field migrations,
       deployment order, rehearsal evidence, and rollback boundaries. The

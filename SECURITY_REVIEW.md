@@ -57,9 +57,13 @@ component.
 - The demo identity switcher is intentionally insecure and is clearly labeled as
   unsuitable for production authentication.
 
-## Remaining release checks
+## Compatibility evidence
 
-- Run the Node 20/22 and minimum/current Convex compatibility matrix in CI.
+- The packed production artifact passes on Node 20 and 22 against the minimum
+  supported Convex `1.43.0` and the current npm `latest` release.
+
+## Future review triggers
+
 - Repeat this review whenever authorization, membership lifecycle, retention,
   admin deletion, or storage integration enters the supported contract.
 
