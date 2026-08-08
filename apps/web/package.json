@@ -4,25 +4,27 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "convex:dev": "convex dev --typecheck-components",
     "dev": "next dev",
-    "test": "vitest run --passWithNoTests",
-    "typecheck": "tsc --noEmit"
+    "postinstall": "fumadocs-mdx",
+    "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "@convex-chat/r2": "workspace:*",
-    "@convex-dev/r2": "0.10.2",
-    "convex": "1.43.0",
-    "convex-chat": "workspace:*",
+    "fumadocs-core": "16.14.1",
+    "fumadocs-mdx": "15.2.2",
+    "fumadocs-ui": "npm:@fumadocs/base-ui@16.14.1",
+    "lucide-react": "1.30.0",
     "next": "16.3.0",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/mdx": "^2.0.14",
     "@types/node": "^24.12.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "typescript": "5.9.3",
-    "vitest": "4.1.4"
+    "postcss": "^8.5.25",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3"
   }
 }

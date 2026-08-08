@@ -1,0 +1,36 @@
+---
+title: Run the example
+description: Launch the included Next.js and Convex chat application locally.
+icon: Play
+---
+
+The example demonstrates direct and group conversations, unread state, replies, edits, reactions, image and voice attachments, online presence, and typing indicators.
+
+## Requirements
+
+- Node.js 20 or newer
+- pnpm 10
+- A Convex account and development deployment
+
+## Start Convex
+
+```bash
+pnpm install
+pnpm --filter convex-chat build:codegen
+pnpm convex:dev
+```
+
+## Start Next.js
+
+In a second terminal:
+
+```bash
+pnpm dev:example
+```
+
+Open [http://localhost:3001](http://localhost:3001). Convex writes the ignored deployment settings to `apps/example/.env.local`.
+
+<Callout type="warn" title="Demo identity only">
+  The Alice, Bob, and Charlie switcher is intentionally insecure. Production
+  applications must derive identity in authenticated host functions.
+</Callout>

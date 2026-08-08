@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 180" role="img" aria-labelledby="title description">
+  <title id="title">Mediterranean cove</title>
+  <desc id="description">A sunny illustrated cove with blue water, warm cliffs, trees, and a small red boat.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#bde7f1" />
+      <stop offset="1" stop-color="#eef7ed" />
+    </linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#42b7bd" />
+      <stop offset="1" stop-color="#147e91" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="180" fill="url(#sky)" />
+  <circle cx="326" cy="35" r="19" fill="#ffe7a6" opacity=".95" />
+  <path d="M0 77 50 45l53 25 51-20 42 31 64-42 55 35 40-23 45 25v45H0Z" fill="#799d74" />
+  <path d="M0 94 58 62l45 19 50-17 45 34 66-43 53 34 43-21 40 25v40H0Z" fill="#c59a6b" />
+  <path d="M0 108c47-14 85-13 126 1 42 15 77 9 116-4 54-18 100-12 158 8v67H0Z" fill="url(#water)" />
+  <path d="M0 117c46-11 85-8 125 5 44 15 79 8 118-4 53-17 101-11 157 10" fill="none" stroke="#8dd9d1" stroke-width="5" opacity=".65" />
+  <path d="m232 126 38 2-10 10h-24Z" fill="#d55545" />
+  <path d="M250 104v23" stroke="#684b36" stroke-width="3" />
+  <path d="m252 106 18 14h-18Z" fill="#fff4d8" />
+  <path d="M35 75c8-24 24-33 35-34-1 11-9 21-20 29 15-15 29-19 41-17-7 14-21 23-39 27" fill="#326f50" />
+  <path d="M47 71v39" stroke="#654a36" stroke-width="5" />
+  <path d="M333 77c7-20 20-28 30-29-1 10-7 18-17 25 13-12 25-16 35-14-6 12-18 20-33 23" fill="#326f50" />
+  <path d="M343 74v35" stroke="#654a36" stroke-width="5" />
+</svg>

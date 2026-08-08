@@ -4,7 +4,9 @@
   "description": "Authorization-aware human chat primitives for Convex applications.",
   "keywords": [
     "chat",
+    "component",
     "convex",
+    "convex-component",
     "messaging",
     "realtime",
     "typescript"
@@ -25,7 +27,9 @@
   "type": "module",
   "files": [
     "dist",
-    "src"
+    "src",
+    "!src/**/*.test.*",
+    "!src/component/test.setup.ts"
   ],
   "main": "./dist/client/index.js",
   "types": "./dist/client/index.d.ts",
@@ -52,10 +56,13 @@
     }
   },
   "scripts": {
-    "build": "tsc6 -p tsconfig.build.json",
-    "build:codegen": "cd ../../apps/web && convex codegen --component-dir ../../packages/convex-chat/src/component --typecheck disable && cd ../../packages/convex-chat && pnpm build",
+    "build": "pnpm clean && tsc6 -p tsconfig.build.json",
+    "build:codegen": "cd ../../apps/example && convex codegen --component-dir ../../packages/convex-chat/src/component --typecheck disable && cd ../../packages/convex-chat && pnpm build",
+    "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
     "dev": "tsc6 -p tsconfig.build.json --watch",
     "prepack": "pnpm build",
+    "prepublishOnly": "node scripts/check-publish-tag.mjs",
+    "publish:next": "npm publish --tag next",
     "test": "vitest run",
     "typecheck": "tsc6 --noEmit"
   },
@@ -72,7 +79,8 @@
     "vitest": "4.1.4"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "tag": "next"
   },
   "dependencies": {
     "@convex-dev/presence": "0.4.0"

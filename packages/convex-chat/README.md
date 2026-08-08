@@ -2,9 +2,12 @@
 
 Authorization-aware direct and small-group chat primitives for Convex.
 
+[Live demo](https://convex-chat.dev/) · [Documentation](https://convex-chat.dev/docs)
+
 > [!WARNING]
 > This package is an early alpha. Its API and data model may change before the
-> first stable release.
+> first stable release. Install the implementation with `convex-chat@next`;
+> the `latest` tag still points to the npm `0.0.1` name-reservation placeholder.
 
 ## What it provides
 
@@ -19,7 +22,7 @@ Authorization-aware direct and small-group chat primitives for Convex.
 ## Install
 
 ```sh
-pnpm add convex-chat convex
+pnpm add convex-chat@next convex
 ```
 
 Register the component in `convex/convex.config.ts`:
@@ -69,12 +72,12 @@ another user's subject ID. The component repeats chat-local membership checks
 for actor operations even when the host wrapper has authenticated the caller.
 
 Attachment bytes and storage credentials stay outside the component. The
-optional `@convex-chat/r2` package implements the storage contract for
-Cloudflare R2.
+host application can integrate Cloudflare R2, native Convex storage, S3, or
+another provider without changing the durable chat model.
 
 See the [repository README](https://github.com/dciccale/convex-chat#readme),
-[presence guide](https://github.com/dciccale/convex-chat/blob/main/docs/presence.md),
-[attachment guide](https://github.com/dciccale/convex-chat/blob/main/docs/attachments.md),
+[presence guide](https://github.com/dciccale/convex-chat/blob/main/apps/web/content/docs/guides/presence.md),
+[attachment guide](https://github.com/dciccale/convex-chat/blob/main/apps/web/content/docs/guides/attachments.md),
 and [security policy](https://github.com/dciccale/convex-chat/security/policy)
 for more detail.
 

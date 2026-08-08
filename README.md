@@ -6,6 +6,8 @@ Authorization-aware chat primitives for [Convex](https://www.convex.dev/).
 [![Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![alpha](https://img.shields.io/badge/status-alpha-orange.svg)](CHANGELOG.md)
 
+[Live demo](https://convex-chat.dev/) · [Documentation](https://convex-chat.dev/docs)
+
 `convex-chat` is an independent Convex component for direct and small-group
 human messaging. It owns the durable chat invariants—membership, ordering,
 idempotency, unread state, message lifecycle, and presence—while your
@@ -14,7 +16,9 @@ policy.
 
 > [!WARNING]
 > This project is an early alpha. Its API and data model may change before the
-> first stable release. It is not yet published to npm.
+> first stable release. Install the implementation from npm with
+> `convex-chat@next`; the `latest` tag still points to the `0.0.1`
+> name-reservation placeholder.
 
 ## Features
 
@@ -26,7 +30,7 @@ policy.
 - Revision-safe edits and delete-for-everyone tombstones
 - Allowlisted reactions
 - Online presence and typing indicators
-- Provider-neutral attachment descriptors and an optional Cloudflare R2 adapter
+- Provider-neutral attachment descriptors with a direct Cloudflare R2 example
 - A responsive Next.js example with a deliberately fake identity switcher
 
 ## How it fits together
@@ -40,7 +44,7 @@ Your public Convex functions  ── authenticate and derive the actor
     ▼
 convex-chat component         ── enforce membership and chat invariants
     │
-    └── optional storage adapter for attachment bytes
+    └── host-managed storage for attachment bytes
 ```
 
 The component never decides whether two people are allowed to start a chat.
@@ -53,9 +57,8 @@ component boundary as opaque strings.
 | Path                   | Purpose                                       |
 | ---------------------- | --------------------------------------------- |
 | `packages/convex-chat` | Publishable Convex component and host helpers |
-| `packages/r2`          | Optional Cloudflare R2 attachment adapter     |
-| `apps/web`             | Runnable Next.js and Convex example           |
-| `docs`                 | Design contract and integration guidance      |
+| `apps/example`         | Runnable Next.js and Convex example           |
+| `apps/web`             | Marketing website and Fumadocs documentation  |
 
 ## Run the example
 
@@ -71,12 +74,19 @@ pnpm convex:dev
 Keep the Convex process running, then start the frontend in another terminal:
 
 ```sh
-pnpm --filter @convex-chat/web dev
+pnpm dev:example
 ```
 
-Open [http://localhost:3000](http://localhost:3000). On first use, the Convex
+Open [http://localhost:3001](http://localhost:3001). On first use, the Convex
 CLI will ask you to select or create a project and will write the deployment
-settings to the ignored `apps/web/.env.local` file.
+settings to the ignored `apps/example/.env.local` file.
+
+The marketing and documentation site runs separately on
+[http://localhost:3000](http://localhost:3000):
+
+```sh
+pnpm dev:web
+```
 
 The example lets you switch between Alice, Bob, and Charlie in the browser.
 That is intentionally insecure demo plumbing; never accept `scopeId` or
@@ -84,8 +94,7 @@ That is intentionally insecure demo plumbing; never accept `scopeId` or
 
 ## Add the component to an application
 
-Until the first npm release, use a workspace checkout. Once published, install
-`convex-chat` and register it in `convex/convex.config.ts`:
+Install `convex-chat@next` and register it in `convex/convex.config.ts`:
 
 ```ts
 import chat from "convex-chat/convex.config.js";
@@ -104,7 +113,7 @@ the generated component API.
 
 Conversation creation should stay in host-controlled mutations, after your
 application has checked its own relationship and policy rules. See
-[`apps/web/convex/chat.ts`](apps/web/convex/chat.ts) for a compact integration
+[`apps/example/convex/chat.ts`](apps/example/convex/chat.ts) for a compact integration
 example and [`packages/convex-chat/README.md`](packages/convex-chat/README.md)
 for package-specific setup.
 
@@ -112,10 +121,10 @@ for package-specific setup.
 
 The component stores attachment descriptors, not binary data or provider
 credentials. The host application authorizes uploads, resolves download URLs,
-and deletes objects. The optional `@convex-chat/r2` package implements this
-contract with `@convex-dev/r2`.
+and deletes objects. The example integrates `@convex-dev/r2` directly while
+keeping its upload grants and conversation authorization in host functions.
 
-See [`docs/attachments.md`](docs/attachments.md) for the security model and R2
+See [`apps/web/content/docs/guides/attachments.md`](apps/web/content/docs/guides/attachments.md) for the security model and R2
 setup.
 
 ## Presence
@@ -125,26 +134,27 @@ state. Conversation membership is checked before presence operations, and
 applications may omit the host wrappers when presence is disabled by product
 policy.
 
-See [`docs/presence.md`](docs/presence.md) for lifecycle, API, and privacy
+See [`apps/web/content/docs/guides/presence.md`](apps/web/content/docs/guides/presence.md) for lifecycle, API, and privacy
 details.
 
 ## Deploy the example
 
-For Vercel Git integration, use `apps/web` as the project root and set a Convex
+For Vercel Git integration, use `apps/example` as the project root and set a Convex
 deploy key as `CONVEX_DEPLOY_KEY`. Use separate production and preview keys;
-never reuse a production deploy key for previews. `apps/web/vercel.json`
+never reuse a production deploy key for previews. `apps/example/vercel.json`
 contains the workspace-aware build command.
 
 ## Project status
 
-The implemented alpha covers the features listed above. Invitations and role
-management, general data parts, configurable receipt privacy, manual unread,
-lifecycle jobs, React Native helpers, and release hardening remain on the v0.1
-roadmap.
+The implemented alpha covers the features listed above. The maintained roadmap
+distinguishes supported behavior from modeled groundwork and future work.
 
 The original v0.1 design proposal and roadmap is in
-[`docs/convex-chat-v0.1-prd.md`](docs/convex-chat-v0.1-prd.md). Changes since the
+[`apps/web/content/docs/reference/convex-chat-v0.1-prd.md`](apps/web/content/docs/reference/convex-chat-v0.1-prd.md). Changes since the
 last release are tracked in [`CHANGELOG.md`](CHANGELOG.md).
+
+The current feature boundary and prioritized roadmap are documented in
+[`apps/web/content/docs/reference/roadmap.mdx`](apps/web/content/docs/reference/roadmap.mdx).
 
 ## Development
 

@@ -1,0 +1,22 @@
+---
+title: Messages and relations
+description: Understand ordering, parts, replies, edits, deletion, and reactions.
+icon: MessagesSquare
+---
+
+Every durable conversation item receives a monotonically increasing sequence. Text and attachments are represented as ordered message parts with stable identifiers.
+
+## Delivery behavior
+
+- Client message IDs make sends idempotent.
+- Sequence numbers provide deterministic ordering.
+- Edits use expected revisions to prevent lost updates.
+- Delete-for-everyone produces a tombstone rather than removing history.
+
+## Replies
+
+Replies point to a message in the same conversation and retain a small quote snapshot. If the source message is later deleted, an already-sent reply can still explain what it referred to without exposing the original full payload.
+
+## Reactions
+
+Reactions are allowlisted, transactionally toggled, and aggregated per message. They stay inside the chat invariant boundary so membership and message lifecycle checks cannot drift from a separate reaction store.

@@ -61,6 +61,12 @@ export default defineSchema({
       "access",
       "inboxUpdatedAt",
     ])
+    .index("scope_subject_state_access", [
+      "scopeId",
+      "subjectId",
+      "state",
+      "access",
+    ])
     .index("conversation_state_role", ["conversationId", "state", "role"]),
 
   messages: defineTable({

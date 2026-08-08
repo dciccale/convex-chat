@@ -1,0 +1,28 @@
+---
+title: Host API
+description: The public integration surface exposed by actor-scoped host helpers.
+icon: Braces
+---
+
+`exposeChatApi` creates Convex functions that resolve the actor in your host application before calling the component.
+
+## Conversations and messages
+
+- `listConversations` returns conversation summaries for the actor.
+- `listMessages` returns ordered message projections after membership checks.
+- `sendText` sends an idempotent text message.
+- `sendAttachment` sends a provider-neutral attachment descriptor.
+- `editOwnTextPart` replaces the actor's text part when its expected revision matches.
+- `deleteOwnMessage` creates a delete-for-everyone tombstone and returns attachment keys for host cleanup.
+- `setReaction` toggles an allowlisted reaction.
+- `markReadThrough` advances the actor's read watermark monotonically.
+
+## Presence
+
+- `heartbeatOnline`, `disconnectOnline`, and `listOnline` maintain app-level availability scoped to chat participants.
+- `heartbeatPresence`, `disconnectPresence`, and `listPresence` maintain conversation sessions used for typing.
+- `setTyping` updates the actor's conversation-scoped typing state.
+
+Applications may omit the presence wrappers when presence is disabled by product policy.
+
+See the generated TypeScript declarations and package README for the exact arguments available in the current alpha.

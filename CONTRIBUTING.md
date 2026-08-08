@@ -24,7 +24,7 @@ pnpm convex:dev
 ```
 
 ```sh
-pnpm --filter @convex-chat/web dev
+pnpm --filter @convex-chat/example dev
 ```
 
 ## Project boundaries
@@ -37,8 +37,8 @@ operations must verify chat-local membership inside the component, even when a
 host wrapper has already authenticated the caller. Host table IDs cross the
 component boundary as opaque strings.
 
-The publishable package lives in `packages/convex-chat`; optional adapters live
-in `packages`; runnable examples live in `apps`.
+The publishable package lives in `packages/convex-chat`; runnable examples and
+host integrations live in `apps`.
 
 ## Pull requests
 
@@ -56,6 +56,24 @@ pnpm typecheck
 pnpm build
 pnpm --filter convex-chat pack --pack-destination /tmp
 ```
+
+## Publishing a prerelease
+
+Publishing changes npm state and must only happen with the maintainer's explicit
+approval. From `packages/convex-chat`, verify the tarball and tag without
+publishing:
+
+```sh
+pnpm publish:next --dry-run
+```
+
+After approval, publish the alpha under the `next` dist-tag:
+
+```sh
+pnpm publish:next
+```
+
+The package's publish guard rejects prerelease versions sent to `latest`.
 
 By contributing, you agree that your contributions are licensed under the
 Apache License 2.0, as described in [`LICENSE`](LICENSE).

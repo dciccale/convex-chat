@@ -1,0 +1,47 @@
+---
+title: convex-chat
+description: Authorization-aware direct and small-group chat primitives for Convex applications.
+icon: MessageCircleMore
+---
+
+`convex-chat` is an independent Convex component for human messaging. It owns durable chat invariants—membership, ordering, idempotency, unread state, message lifecycle, and presence—while your application owns authentication, relationships, and product policy.
+
+<Callout type="warn" title="Early alpha">
+  The API and data model may change before the first stable release. The package
+  `latest` tag currently points to the `0.0.1` name-reservation placeholder;
+  install the implementation with `convex-chat@next`.
+</Callout>
+
+## What it provides
+
+- Direct and small-group conversations
+- Chat-local membership checks on actor operations
+- Ordered, idempotent messages and exact unread counts
+- Replies, revision-safe edits, tombstones, and reactions
+- Online presence and typing indicators
+- Provider-neutral attachment descriptors
+
+## Start here
+
+<Cards>
+  <Card
+    title="Install the component"
+    href="/docs/getting-started/installation"
+    description="Register convex-chat and expose actor-scoped host functions."
+  />
+  <Card
+    title="Run the example"
+    href="/docs/getting-started/example"
+    description="Try realtime conversations, attachments, voice messages, and presence."
+  />
+  <Card
+    title="Understand the boundary"
+    href="/docs/concepts/architecture"
+    description="See what belongs to your app and what belongs to the component."
+  />
+  <Card
+    title="Review the roadmap"
+    href="/docs/reference/roadmap"
+    description="Separate supported behavior from modeled groundwork and future priorities."
+  />
+</Cards>

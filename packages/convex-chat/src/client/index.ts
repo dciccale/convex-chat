@@ -21,25 +21,6 @@ export type ChatAttachment = {
   fallbackText: string;
 };
 
-export type StoredAttachmentMetadata = {
-  storageKey: string;
-  mediaType?: string;
-  size?: number;
-};
-
-/** Host-side storage implementations map provider objects to opaque chat parts. */
-export interface ChatStorageAdapter<UploadContext, ReadContext, DeleteContext> {
-  readonly provider: string;
-  createUploadUrl(key: string): Promise<{ key: string; url: string }>;
-  syncMetadata(ctx: UploadContext, key: string): Promise<void>;
-  getMetadata(
-    ctx: ReadContext,
-    key: string,
-  ): Promise<StoredAttachmentMetadata | null>;
-  getDownloadUrl(key: string, expiresInSeconds?: number): Promise<string>;
-  delete(ctx: DeleteContext, key: string): Promise<void>;
-}
-
 type AuthContext = { auth: Auth };
 
 /**
@@ -74,6 +55,36 @@ export function exposeChatApi(
       handler: async (ctx, args) => {
         const actor = await options.authenticate(ctx);
         return ctx.runQuery(component.presence.list, { ...actor, ...args });
+      },
+    }),
+    listOnline: queryGeneric({
+      args: { conversationId: v.string() },
+      handler: async (ctx, args) => {
+        const actor = await options.authenticate(ctx);
+        return ctx.runQuery(component.presence.listOnline, {
+          ...actor,
+          ...args,
+        });
+      },
+    }),
+    heartbeatOnline: mutationGeneric({
+      args: { sessionId: v.string(), interval: v.number() },
+      handler: async (ctx, args) => {
+        const actor = await options.authenticate(ctx);
+        return ctx.runMutation(component.presence.heartbeatOnline, {
+          ...actor,
+          ...args,
+        });
+      },
+    }),
+    disconnectOnline: mutationGeneric({
+      args: { sessionToken: v.string() },
+      handler: async (ctx, args) => {
+        const actor = await options.authenticate(ctx);
+        return ctx.runMutation(component.presence.disconnectOnline, {
+          ...actor,
+          ...args,
+        });
       },
     }),
     heartbeatPresence: mutationGeneric({

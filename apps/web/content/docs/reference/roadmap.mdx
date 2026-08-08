@@ -1,0 +1,207 @@
+---
+title: Feature status and roadmap
+description: Distinguish supported chat behavior from modeled groundwork and prioritized future capabilities.
+icon: ListChecks
+---
+
+This page records the current feature boundary and the next important messaging
+capabilities. It is a planning guide, not a compatibility promise or a release
+commitment. The exported TypeScript API, package README, and changelog remain
+the authority for a particular release.
+
+The roadmap deliberately focuses on reusable human chat. Authentication,
+relationships, blocking policy, moderation decisions, push delivery, and other
+application policy stay in the host application even when the component
+provides state or events that help enforce them.
+
+## Supported baseline
+
+The current alpha supports direct and small-group conversations,
+membership-checked access, ordered and idempotent text and attachment messages,
+paginated history, exact unread counts, replies, revision-safe author edits,
+author deletion with tombstones, allowlisted reactions, app-wide online state,
+conversation-scoped typing, and provider-neutral attachment descriptors.
+
+The example additionally demonstrates private R2 uploads, signed downloads,
+images, recorded voice messages, a responsive inbox and conversation UI, and a
+deliberately insecure identity switcher. Example behavior is not automatically
+a reusable component API.
+
+## Modeled, but not yet a complete public feature
+
+The schema contains groundwork for the following capabilities, but they must
+not yet be advertised as complete workflows:
+
+- **Membership roles:** `owner`, `admin`, and `member` are represented, but
+  there are no public promote, demote, or ownership-transfer operations.
+- **Membership lifecycle:** invited, active, left, and removed states exist,
+  but invitations, acceptance, leaving, removal, and rejoining are not exposed
+  as a complete API.
+- **Conversation lifecycle:** active, archived, and deleting states exist, but
+  archive, restore, and deletion workflows are not implemented.
+- **Extensible message parts:** data and system part validators exist, but the
+  public host helpers currently send text and attachments only.
+- **Delivery groundwork:** memberships store delivered and read positions and
+  timestamps, but recipient-level delivery and read receipts are not exposed.
+- **History boundaries:** each membership has a history start sequence, but
+  adding members and selecting a history-sharing policy are not public
+  workflows yet.
+
+Schema presence is intentional forward compatibility, not evidence that the
+feature is ready. Every item needs authorization rules, public operations,
+tests, documentation, and upgrade semantics before it becomes supported.
+
+## Central features not yet available
+
+These are the highest-value gaps for a reusable application-chat component.
+
+### Membership and group administration
+
+Add, invite, approve, remove, leave, and rejoin flows; promote and demote
+admins; transfer ownership; rename groups; and define who may change group
+settings or send messages. Relationship checks and the decision to create a
+conversation remain host policy, while chat-local roles and membership
+invariants belong in the component.
+
+### Notification event hooks
+
+Emit stable post-commit events for new messages, edits, deletion, reactions,
+mentions, and membership changes. Hosts can consume those events for push,
+email, badges, analytics, or webhooks without making the component responsible
+for delivery providers or notification policy.
+
+### Recipient-level message status
+
+Expose sent, delivered, and read positions or receipts, including useful group
+breakdowns and privacy controls. The current read watermark gives exact unread
+counts but does not answer which recipients delivered or read an individual
+message.
+
+### Per-conversation notification preferences
+
+Model mute durations, notification level, and mention-only behavior per
+membership. Actual push or email delivery remains a host responsibility.
+
+### Explicit membership history policy
+
+When adding a participant, let the authorized host choose whether history
+starts now, at a recent sequence, or at the beginning. Preserve the existing
+history boundary on every message and attachment read.
+
+## Important everyday messaging features
+
+These features are not required for the correctness of the existing core, but
+they make ordinary daily chat substantially more useful.
+
+### Search and inbox filters
+
+Search message text and captions within one conversation or across the inbox.
+Add useful inbox filters such as unread, direct, and group conversations. Search
+must respect membership history and current access.
+
+### Pins, stars, and saved messages
+
+Support shared pinned messages, private per-member stars or bookmarks, and
+participant-specific pinned or archived conversations. Shared and private
+state should remain separate.
+
+### Mentions
+
+Represent structured group-member mentions, expose mention-aware notification
+events, and provide a mentions-and-replies filter. Do not infer mentions only
+from display text.
+
+### More attachment types
+
+Add maintained host examples for general files, documents, video, GIFs,
+stickers, contact cards, and locations. The core can continue storing opaque,
+provider-neutral descriptors while hosts authorize bytes, validate metadata,
+and render each media type.
+
+### Link previews
+
+Represent safe, versioned URL metadata as a message part. Fetching, sanitizing,
+trust policy, and refresh behavior belong in the host.
+
+### Forwarding and cross-conversation sharing
+
+Define whether forwarding copies content or references existing storage,
+preserve appropriate attribution, and reauthorize every attachment in the
+destination conversation.
+
+### Polls
+
+Provide a first-party structured message type with transactional voting,
+single- or multiple-choice rules, closing behavior, and membership checks.
+Polls are a normal group-chat primitive and do not require a general bot or
+command system.
+
+### Drafts and composer recovery
+
+Persist private per-member drafts, reply and edit state, and recoverable
+attachment uploads. Drafts must never be visible to other participants.
+
+### Admin deletion and moderation hooks
+
+Allow narrowly authorized group admins to tombstone another participant's
+message while preserving who performed the action. Reporting, abuse decisions,
+and moderation policy remain host-owned.
+
+## Privacy and lifecycle features
+
+### Disappearing messages and retention
+
+Add per-conversation retention settings, scheduled tombstones, attachment
+cleanup, and explicit behavior for replies, quotes, reactions, and unread
+watermarks. Lifecycle jobs must be idempotent and safe to resume.
+
+### View-once attachments
+
+Define consumption, retries, multiple devices, expiry, and deletion before
+presenting this as a privacy feature. A signed URL alone is not view-once
+semantics.
+
+### Delete for me
+
+Add a private per-member visibility layer that hides a message or clears a
+conversation without changing the shared message history or creating a global
+tombstone.
+
+### Blocking and reporting integration
+
+Keep the application's relationship and abuse policy authoritative, but expose
+clean host hooks for blocking enforcement and immutable report snapshots when
+needed.
+
+### End-to-end encryption
+
+The current component uses trusted server-side processing and is not end-to-end
+encrypted. E2EE would change message storage, indexing, search, previews,
+multi-device key management, recovery, moderation, and attachment handling. It
+must be treated as a separate architecture initiative rather than an
+incremental checkbox.
+
+## Recommended implementation order
+
+1. **Membership lifecycle and group administration.** Complete the existing
+   schema groundwork and establish the authorization model needed by later
+   group features.
+2. **Notification events and per-chat preferences.** Give hosts reliable hooks
+   for push and badges without coupling the component to a provider.
+3. **Recipient-level delivery and read receipts.** Build on the existing
+   monotonic watermarks and define privacy behavior explicitly.
+4. **Search, mentions, pins, and private stars.** Add the daily organization
+   features that make growing conversation histories manageable.
+5. **General file and video support plus link previews.** Expand maintained host
+   integrations while keeping storage and fetch policy outside the component.
+6. **Retention and disappearing messages.** Add lifecycle workers only after
+   membership, receipts, notifications, and attachment cleanup semantics are
+   stable.
+7. **Polls and other first-party structured parts.** Prove the extensible part
+   model with deliberate chat primitives rather than a general plugin system.
+
+Voice and video calls, screen sharing, encrypted backup and device transfer,
+broadcast lists, communities, channels, stories, payments, bots, slash
+commands, and AI agents are deliberately outside this sequence. They may be
+valuable adjacent products, but they are not prerequisites for a strong,
+reusable human-chat component.

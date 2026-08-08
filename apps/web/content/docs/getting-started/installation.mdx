@@ -1,0 +1,53 @@
+---
+title: Installation
+description: Add convex-chat to a Convex application and expose an authenticated API.
+icon: PackagePlus
+---
+
+## Install
+
+```bash
+pnpm add convex-chat@next convex
+```
+
+The npm `0.0.1` release is a name-reservation placeholder. Install the
+implementation from the `next` tag while the package remains in alpha.
+
+## Register the component
+
+Add the component in `convex/convex.config.ts`:
+
+```ts
+import chat from "convex-chat/convex.config.js";
+import { defineApp } from "convex/server";
+
+const app = defineApp();
+app.use(chat);
+
+export default app;
+```
+
+Run `npx convex dev` so Convex generates the component API.
+
+## Expose actor-scoped functions
+
+Your host functions must authenticate the caller and derive stable, opaque scope and subject IDs. Never accept those IDs from an untrusted client.
+
+```ts
+import { exposeChatApi } from "convex-chat";
+import { components } from "./_generated/api";
+
+const api = exposeChatApi(components.chat, {
+  authenticate: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthenticated");
+    return resolveChatActor(identity);
+  },
+});
+
+export const listConversations = api.listConversations;
+export const listMessages = api.listMessages;
+export const sendText = api.sendText;
+```
+
+Conversation creation remains a host-controlled operation after your application checks relationships and product policy.

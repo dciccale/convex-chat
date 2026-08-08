@@ -465,6 +465,13 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         null,
         Name
       >;
+      disconnectOnline: FunctionReference<
+        "mutation",
+        "internal",
+        { scopeId: string; sessionToken: string; subjectId: string },
+        null,
+        Name
+      >;
       heartbeat: FunctionReference<
         "mutation",
         "internal",
@@ -476,6 +483,18 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           subjectId: string;
         },
         { roomToken: string; sessionToken: string },
+        Name
+      >;
+      heartbeatOnline: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          interval: number;
+          scopeId: string;
+          sessionId: string;
+          subjectId: string;
+        },
+        { sessionToken: string },
         Name
       >;
       list: FunctionReference<
@@ -492,6 +511,17 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           online: boolean;
           subjectId: string;
           typing: boolean;
+        }>,
+        Name
+      >;
+      listOnline: FunctionReference<
+        "query",
+        "internal",
+        { conversationId: string; scopeId: string; subjectId: string },
+        Array<{
+          lastDisconnected?: number;
+          online: boolean;
+          subjectId: string;
         }>,
         Name
       >;

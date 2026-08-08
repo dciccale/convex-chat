@@ -1,10 +1,33 @@
 /// <reference types="vite/client" />
 
 import { describe, expect, test } from "vitest";
+import componentTest, { register } from "../test.js";
 import { api } from "./_generated/api.js";
 import { initConvexTest } from "./test.setup.js";
 
 describe("initial chat vertical slice", () => {
+  test("exports a clean test registrar with nested components", () => {
+    expect(Object.keys(componentTest.modules)).not.toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(".test."),
+        expect.stringContaining("test.setup"),
+      ]),
+    );
+
+    const componentPaths: string[] = [];
+    register(
+      {
+        registerComponent: (path: string) => componentPaths.push(path),
+      } as never,
+      "customChat",
+    );
+    expect(componentPaths).toEqual([
+      "customChat",
+      "customChat/presence",
+      "customChat/presence/batchWorker",
+    ]);
+  });
+
   test("creates an idempotent direct conversation", async () => {
     const t = initConvexTest();
     const args = {
@@ -130,7 +153,148 @@ describe("initial chat vertical slice", () => {
     ]);
   });
 
-  test("scopes online and typing presence to conversation members", async () => {
+  test("keeps online app-wide while typing stays conversation-scoped", async () => {
+    const t = initConvexTest();
+    const aliceConversation = await t.mutation(api.conversations.create, {
+      scopeId: "test",
+      createdBySubjectId: "alice",
+      kind: "direct",
+      memberSubjectIds: ["alice", "bob"],
+    });
+    const charlieConversation = await t.mutation(api.conversations.create, {
+      scopeId: "test",
+      createdBySubjectId: "bob",
+      kind: "direct",
+      memberSubjectIds: ["bob", "charlie"],
+    });
+
+    await expect(
+      t.mutation(api.presence.heartbeatOnline, {
+        scopeId: "test",
+        subjectId: "mallory",
+        sessionId: "mallory-session",
+        interval: 10_000,
+      }),
+    ).rejects.toThrow("Chat participant not found");
+
+    await t.mutation(api.presence.heartbeatOnline, {
+      scopeId: "test",
+      subjectId: "alice",
+      sessionId: "alice-app",
+      interval: 10_000,
+    });
+    const bobAppFirst = await t.mutation(api.presence.heartbeatOnline, {
+      scopeId: "test",
+      subjectId: "bob",
+      sessionId: "bob-phone-app",
+      interval: 10_000,
+    });
+    const bobAppSecond = await t.mutation(api.presence.heartbeatOnline, {
+      scopeId: "test",
+      subjectId: "bob",
+      sessionId: "bob-laptop-app",
+      interval: 10_000,
+    });
+    const aliceRoom = await t.mutation(api.presence.heartbeat, {
+      scopeId: "test",
+      subjectId: "alice",
+      conversationId: aliceConversation.id,
+      sessionId: "alice-room",
+      interval: 10_000,
+    });
+    const bobAliceRoom = await t.mutation(api.presence.heartbeat, {
+      scopeId: "test",
+      subjectId: "bob",
+      conversationId: aliceConversation.id,
+      sessionId: "bob-alice-room",
+      interval: 10_000,
+    });
+    await t.mutation(api.presence.setTyping, {
+      scopeId: "test",
+      subjectId: "bob",
+      conversationId: aliceConversation.id,
+      typing: true,
+    });
+
+    const online = await t.query(api.presence.listOnline, {
+      scopeId: "test",
+      subjectId: "alice",
+      conversationId: aliceConversation.id,
+    });
+    expect(online.find((entry) => entry.subjectId === "bob")?.online).toBe(
+      true,
+    );
+    const typing = await t.query(api.presence.list, {
+      scopeId: "test",
+      subjectId: "alice",
+      conversationId: aliceConversation.id,
+      roomToken: aliceRoom.roomToken,
+    });
+    expect(typing.find((entry) => entry.subjectId === "bob")?.typing).toBe(
+      true,
+    );
+
+    await t.mutation(api.presence.disconnect, {
+      scopeId: "test",
+      subjectId: "bob",
+      conversationId: aliceConversation.id,
+      sessionToken: bobAliceRoom.sessionToken,
+    });
+    await t.mutation(api.presence.heartbeat, {
+      scopeId: "test",
+      subjectId: "bob",
+      conversationId: charlieConversation.id,
+      sessionId: "bob-charlie-room",
+      interval: 10_000,
+    });
+    const afterSwitchOnline = await t.query(api.presence.listOnline, {
+      scopeId: "test",
+      subjectId: "alice",
+      conversationId: aliceConversation.id,
+    });
+    expect(
+      afterSwitchOnline.find((entry) => entry.subjectId === "bob")?.online,
+    ).toBe(true);
+    const afterSwitchTyping = await t.query(api.presence.list, {
+      scopeId: "test",
+      subjectId: "alice",
+      conversationId: aliceConversation.id,
+      roomToken: aliceRoom.roomToken,
+    });
+    expect(
+      afterSwitchTyping.find((entry) => entry.subjectId === "bob")?.typing,
+    ).toBe(false);
+
+    await t.mutation(api.presence.disconnectOnline, {
+      scopeId: "test",
+      subjectId: "bob",
+      sessionToken: bobAppFirst.sessionToken,
+    });
+    const oneAppSessionLeft = await t.query(api.presence.listOnline, {
+      scopeId: "test",
+      subjectId: "alice",
+      conversationId: aliceConversation.id,
+    });
+    expect(
+      oneAppSessionLeft.find((entry) => entry.subjectId === "bob")?.online,
+    ).toBe(true);
+
+    await t.mutation(api.presence.disconnectOnline, {
+      scopeId: "test",
+      subjectId: "bob",
+      sessionToken: bobAppSecond.sessionToken,
+    });
+    const offline = await t.query(api.presence.listOnline, {
+      scopeId: "test",
+      subjectId: "alice",
+      conversationId: aliceConversation.id,
+    });
+    expect(offline.find((entry) => entry.subjectId === "bob")?.online).toBe(
+      false,
+    );
+  });
+
+  test("authorizes app-wide presence by active scope participation", async () => {
     const t = initConvexTest();
     const conversation = await t.mutation(api.conversations.create, {
       scopeId: "test",
@@ -140,91 +304,84 @@ describe("initial chat vertical slice", () => {
     });
 
     await expect(
-      t.mutation(api.presence.heartbeat, {
+      t.mutation(api.presence.heartbeatOnline, {
+        scopeId: "other-scope",
+        subjectId: "alice",
+        sessionId: "alice-app",
+        interval: 10_000,
+      }),
+    ).rejects.toThrow("Chat participant not found");
+    await expect(
+      t.query(api.presence.listOnline, {
         scopeId: "test",
         subjectId: "mallory",
         conversationId: conversation.id,
-        sessionId: "mallory-session",
-        interval: 10_000,
       }),
     ).rejects.toThrow("Conversation not found");
+    await expect(
+      t.mutation(api.presence.heartbeatOnline, {
+        scopeId: "test",
+        subjectId: "alice",
+        sessionId: "",
+        interval: 10_000,
+      }),
+    ).rejects.toThrow("Invalid presence session");
+    await expect(
+      t.mutation(api.presence.heartbeatOnline, {
+        scopeId: "test",
+        subjectId: "alice",
+        sessionId: "alice-app",
+        interval: 4_999,
+      }),
+    ).rejects.toThrow("Invalid presence session");
 
-    const alice = await t.mutation(api.presence.heartbeat, {
-      scopeId: "test",
-      subjectId: "alice",
-      conversationId: conversation.id,
-      sessionId: "alice-session",
-      interval: 10_000,
+    await t.run(async (ctx) => {
+      const conversationId = ctx.db.normalizeId(
+        "conversations",
+        conversation.id,
+      );
+      if (!conversationId) throw new Error("Conversation not found in test");
+      const membership = await ctx.db
+        .query("memberships")
+        .withIndex("conversation_subject", (q) =>
+          q.eq("conversationId", conversationId).eq("subjectId", "alice"),
+        )
+        .unique();
+      if (!membership) throw new Error("Membership not found in test");
+      await ctx.db.patch(membership._id, { access: "read_only" });
     });
-    const bobFirst = await t.mutation(api.presence.heartbeat, {
-      scopeId: "test",
-      subjectId: "bob",
-      conversationId: conversation.id,
-      sessionId: "bob-phone",
-      interval: 10_000,
-    });
-    const bobSecond = await t.mutation(api.presence.heartbeat, {
-      scopeId: "test",
-      subjectId: "bob",
-      conversationId: conversation.id,
-      sessionId: "bob-laptop",
-      interval: 10_000,
-    });
-    await t.mutation(api.presence.setTyping, {
-      scopeId: "test",
-      subjectId: "bob",
-      conversationId: conversation.id,
-      typing: true,
-    });
+    await expect(
+      t.mutation(api.presence.heartbeatOnline, {
+        scopeId: "test",
+        subjectId: "alice",
+        sessionId: "alice-read-only",
+        interval: 10_000,
+      }),
+    ).resolves.toEqual({ sessionToken: expect.any(String) });
 
-    const active = await t.query(api.presence.list, {
-      scopeId: "test",
-      subjectId: "alice",
-      conversationId: conversation.id,
-      roomToken: alice.roomToken,
+    await t.run(async (ctx) => {
+      const conversationId = ctx.db.normalizeId(
+        "conversations",
+        conversation.id,
+      );
+      if (!conversationId) throw new Error("Conversation not found in test");
+      const membership = await ctx.db
+        .query("memberships")
+        .withIndex("conversation_subject", (q) =>
+          q.eq("conversationId", conversationId).eq("subjectId", "alice"),
+        )
+        .unique();
+      if (!membership) throw new Error("Membership not found in test");
+      await ctx.db.patch(membership._id, { state: "left" });
     });
-    expect(active).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ subjectId: "alice", online: true }),
-        expect.objectContaining({
-          subjectId: "bob",
-          online: true,
-          typing: true,
-        }),
-      ]),
-    );
-
-    await t.mutation(api.presence.disconnect, {
-      scopeId: "test",
-      subjectId: "bob",
-      conversationId: conversation.id,
-      sessionToken: bobFirst.sessionToken,
-    });
-    const oneSessionLeft = await t.query(api.presence.list, {
-      scopeId: "test",
-      subjectId: "alice",
-      conversationId: conversation.id,
-      roomToken: alice.roomToken,
-    });
-    expect(
-      oneSessionLeft.find((entry) => entry.subjectId === "bob")?.online,
-    ).toBe(true);
-
-    await t.mutation(api.presence.disconnect, {
-      scopeId: "test",
-      subjectId: "bob",
-      conversationId: conversation.id,
-      sessionToken: bobSecond.sessionToken,
-    });
-    const disconnected = await t.query(api.presence.list, {
-      scopeId: "test",
-      subjectId: "alice",
-      conversationId: conversation.id,
-      roomToken: alice.roomToken,
-    });
-    expect(
-      disconnected.find((entry) => entry.subjectId === "bob")?.online,
-    ).toBe(false);
+    await expect(
+      t.mutation(api.presence.heartbeatOnline, {
+        scopeId: "test",
+        subjectId: "alice",
+        sessionId: "alice-left",
+        interval: 10_000,
+      }),
+    ).rejects.toThrow("Chat participant not found");
   });
 
   test("enforces revision-safe author edits and deletion-safe replies", async () => {
