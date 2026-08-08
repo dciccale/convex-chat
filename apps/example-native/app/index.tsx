@@ -41,7 +41,7 @@ export default function InboxScreen() {
   const loading = booting || conversations === undefined;
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top"]}>
+    <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>convex-chat</Text>

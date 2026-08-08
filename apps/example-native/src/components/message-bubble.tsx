@@ -349,10 +349,16 @@ function AudioAttachment({
   });
   const status = useAudioPlayerStatus(player);
   const [playbackError, setPlaybackError] = useState(false);
+  const [loadedUrl, setLoadedUrl] = useState<string | null>(null);
   const error = status.error || playbackError;
+  const ready = status.isLoaded || loadedUrl === url;
   const duration = status.duration || (declaredDurationMs ?? 0) / 1000;
   const progress =
     duration > 0 ? Math.min(1, status.currentTime / duration) : 0;
+
+  useEffect(() => {
+    if (status.isLoaded) setLoadedUrl(url);
+  }, [status.isLoaded, url]);
 
   useEffect(() => {
     if (!status.didJustFinish) return;
@@ -366,13 +372,13 @@ function AudioAttachment({
         accessibilityLabel={
           error
             ? "Voice message unavailable"
-            : !status.isLoaded
+            : !ready
               ? "Loading voice message"
               : status.playing
                 ? "Pause voice message"
                 : "Play voice message"
         }
-        disabled={!selected && !status.isLoaded && !error}
+        disabled={!selected && !ready && !error}
         onPress={() => {
           if (selected) {
             onClearSelection();
@@ -401,7 +407,7 @@ function AudioAttachment({
         }}
         style={styles.audioButton}
       >
-        {!status.isLoaded && !error ? (
+        {!ready && !error ? (
           <ActivityIndicator color="#e6fbff" size="small" />
         ) : status.playing ? (
           <Pause color="#e6fbff" fill="#e6fbff" size={20} />

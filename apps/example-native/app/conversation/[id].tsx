@@ -89,6 +89,7 @@ export default function ConversationScreen() {
   const inputRef = useRef<TextInput>(null);
   const pinnedToBottom = useRef(true);
   const forceScrollToBottom = useRef(false);
+  const anchorToBottomWhileKeyboardOpens = useRef(false);
   const voiceStartX = useRef(0);
   const voiceCancelledRef = useRef(false);
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -188,17 +189,17 @@ export default function ConversationScreen() {
   }, [latestMessageId, scrollToBottom]);
 
   useEffect(() => {
-    if (!editing) return;
-    const position = () => bringMessageIntoView(editing.id);
+    const position = () => {
+      if (editing) bringMessageIntoView(editing.id);
+      else if (anchorToBottomWhileKeyboardOpens.current) scrollToBottom(false);
+    };
     const shown = Keyboard.addListener("keyboardDidShow", position);
     const frame = Keyboard.addListener("keyboardDidChangeFrame", position);
-    const timer = setTimeout(position, 120);
     return () => {
       shown.remove();
       frame.remove();
-      clearTimeout(timer);
     };
-  }, [bringMessageIntoView, editing]);
+  }, [bringMessageIntoView, editing, scrollToBottom]);
 
   useEffect(() => {
     const last = messages?.at(-1);
@@ -545,6 +546,11 @@ export default function ConversationScreen() {
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         enabled
+        onLayout={() => {
+          if (editing) bringMessageIntoView(editing.id);
+          else if (anchorToBottomWhileKeyboardOpens.current)
+            requestAnimationFrame(() => scrollToBottom(false));
+        }}
         style={styles.keyboardArea}
       >
         <FlatList
@@ -567,6 +573,7 @@ export default function ConversationScreen() {
           }}
           onScroll={onListScroll}
           onScrollBeginDrag={() => {
+            anchorToBottomWhileKeyboardOpens.current = false;
             if (selected) clearSelection();
           }}
           onScrollToIndexFailed={({ index, averageItemLength }) => {
@@ -719,11 +726,21 @@ export default function ConversationScreen() {
                   }}
                   onContentSizeChange={() => {
                     if (editing) bringMessageIntoView(editing.id);
-                    else if (pinnedToBottom.current) scrollToBottom(false);
+                    else if (
+                      pinnedToBottom.current ||
+                      anchorToBottomWhileKeyboardOpens.current
+                    )
+                      scrollToBottom(false);
                   }}
                   onFocus={() => {
+                    anchorToBottomWhileKeyboardOpens.current =
+                      pinnedToBottom.current;
                     if (editing) bringMessageIntoView(editing.id);
-                    else if (pinnedToBottom.current) scrollToBottom();
+                    else if (anchorToBottomWhileKeyboardOpens.current)
+                      scrollToBottom();
+                  }}
+                  onBlur={() => {
+                    anchorToBottomWhileKeyboardOpens.current = false;
                   }}
                   placeholder={editing ? "Edit message" : "Message"}
                   placeholderTextColor="#64748b"
