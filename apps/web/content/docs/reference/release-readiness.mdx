@@ -1,13 +1,13 @@
 ---
 title: Release readiness
-description: The maintained checklist for removing the alpha label from convex-chat.
+description: The maintained checklist for promoting convex-chat 0.1 from release candidate to stable.
 icon: BadgeCheck
 ---
 
-This checklist defines what “out of alpha” means for the existing supported
-baseline. Marketplace approval is an important distribution milestone, but it
-does not replace compatibility, security, upgrade, or production-readiness
-evidence.
+This checklist records the evidence used to move the supported baseline into a
+release candidate and the remaining work before publishing `0.1.0` as stable.
+Marketplace approval is an important distribution milestone, but it does not
+replace compatibility, security, upgrade, or production-readiness evidence.
 
 The first target is a release candidate for `0.1.0`. New roadmap features do not
 block that release unless they are advertised as supported. Items described as
@@ -79,7 +79,7 @@ modeled or future work may remain deferred.
       and package exports, then create the version commit and Git tag.
 - [ ] Publish the non-prerelease version to npm, move the `latest` tag only after
       verification, and smoke-test installation from the public registry.
-- [ ] Replace alpha wording and badges across the repository, package README,
+- [x] Replace alpha wording and badges across the repository, package README,
       website, documentation, security policy, and issue templates.
 
 ## Recommended follow-ups
@@ -100,6 +100,6 @@ modeled or future work may remain deferred.
 
 The roadmap's group administration lifecycle, notification events, delivery
 receipts, notification preferences, search, mentions, pins, retention, polls,
-and other future messaging features are not required to remove the alpha label.
+and other future messaging features are not required for the `0.1` stable release.
 They must remain accurately described as unavailable until their authorization,
 tests, documentation, and upgrade semantics are complete.

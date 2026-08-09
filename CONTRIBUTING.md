@@ -82,7 +82,7 @@ publishing:
 pnpm publish:next --dry-run
 ```
 
-After approval, publish the alpha under the `next` dist-tag:
+After approval, publish the candidate under the `next` dist-tag:
 
 ```sh
 pnpm publish:next

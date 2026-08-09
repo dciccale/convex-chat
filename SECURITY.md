@@ -5,9 +5,9 @@ Please report vulnerabilities through a
 Do not open a public issue for a suspected vulnerability. Include the affected
 version or commit, reproduction steps, impact, and any suggested mitigation.
 
-This project is currently an alpha and does not yet have a formal support
-window. Maintainers will acknowledge reports as soon as practical and will
-coordinate disclosure after a fix is available.
+This project is currently a release candidate and does not yet have a formal
+support window. Maintainers will acknowledge reports as soon as practical and
+will coordinate disclosure after a fix is available.
 
 Applications using this component must authenticate callers in host Convex
 functions and derive `scopeId` and `subjectId` server-side. Never expose a host

@@ -30,7 +30,8 @@ deployment, and smoke-test an authenticated send and read.
 
 Only use `npm-tag=latest` for a non-prerelease package version after the release
 candidate feedback window has closed with no unresolved critical or high-severity
-defects. Verify the registry version before replacing alpha wording and badges.
+defects. Verify the registry version before replacing release-candidate wording
+and badges.
 
 ## Recovery
 

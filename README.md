@@ -5,7 +5,7 @@ Authorization-aware chat primitives for [Convex](https://www.convex.dev/).
 [![CI](https://github.com/dciccale/convex-chat/actions/workflows/ci.yml/badge.svg)](https://github.com/dciccale/convex-chat/actions/workflows/ci.yml)
 [![Convex Component](https://www.convex.dev/components/badge/convex-chat)](https://www.convex.dev/components/convex-chat)
 [![Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-[![alpha](https://img.shields.io/badge/status-alpha-orange.svg)](CHANGELOG.md)
+[![release candidate](https://img.shields.io/badge/status-release%20candidate-blue.svg)](CHANGELOG.md)
 
 [Live demo](https://convex-chat.dev/) · [Documentation](https://convex-chat.dev/docs)
 
@@ -16,8 +16,8 @@ application remains responsible for authentication, relationships, and product
 policy.
 
 > [!WARNING]
-> This project is an early alpha. Its API and data model may change before the
-> first stable release. Install the implementation from npm with
+> This project is on the `0.1.0-rc.1` release candidate. Its API and data model
+> may change before the first stable release. Install the candidate from npm with
 > `convex-chat@next`; the `latest` tag still points to the `0.0.1`
 > name-reservation placeholder.
 
@@ -176,7 +176,7 @@ contains the workspace-aware build command.
 
 ## Project status
 
-The implemented alpha covers the features listed above. The maintained roadmap
+The `0.1.0-rc.1` candidate covers the features listed above. The maintained roadmap
 distinguishes supported behavior from modeled groundwork and future work.
 
 The original v0.1 design proposal and roadmap is in
@@ -185,7 +185,7 @@ last release are tracked in [`CHANGELOG.md`](CHANGELOG.md).
 
 The current feature boundary and prioritized roadmap are documented in
 [`apps/web/content/docs/reference/roadmap.mdx`](apps/web/content/docs/reference/roadmap.mdx).
-The concrete criteria for removing the alpha label are tracked in the
+The release-candidate evidence and criteria for publishing `0.1.0` are tracked in the
 [`release-readiness checklist`](apps/web/content/docs/reference/release-readiness.mdx).
 Upgrade and schema rollout practices are documented in
 [`UPGRADING.md`](UPGRADING.md).

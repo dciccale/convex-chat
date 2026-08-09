@@ -7,8 +7,8 @@ Authorization-aware direct and small-group chat primitives for Convex.
 [Live demo](https://convex-chat.dev/) · [Documentation](https://convex-chat.dev/docs)
 
 > [!WARNING]
-> This package is an early alpha. Its API and data model may change before the
-> first stable release. Install the implementation with `convex-chat@next`;
+> This package is on the `0.1.0-rc.1` release candidate. Its API and data model
+> may change before the first stable release. Install it with `convex-chat@next`;
 > the `latest` tag still points to the npm `0.0.1` name-reservation placeholder.
 
 ## What it provides

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.1.0-rc.1 - 2026-08-09
+
 - Freeze and document the supported `0.1` contract, upgrade and rollback
   practice, security review, release procedure, and release-candidate evidence.
 - Add authorization, concurrency, idempotency, pagination, history-boundary,

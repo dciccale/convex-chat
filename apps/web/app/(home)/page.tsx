@@ -51,7 +51,7 @@ export default function HomePage() {
         <div className="hero-inner">
           <div className="hero-copy">
             <div className="eyebrow">
-              <CircleDot /> Open source · early alpha
+              <CircleDot /> Open source · release candidate
             </div>
             <h1>
               Chat primitives
@@ -76,7 +76,7 @@ export default function HomePage() {
             </div>
             <div className="install-command">
               <span>$</span>
-              <code>pnpm add convex-chat convex</code>
+              <code>pnpm add convex-chat@next convex</code>
             </div>
           </div>
           <ChatPreview />
