@@ -235,7 +235,7 @@ body {
   color: #868077;
 }
 .preview-messages {
-  height: 460px;
+  height: 495px;
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
@@ -715,6 +715,11 @@ body {
     justify-content: flex-start;
   }
 }
+@media (min-width: 961px) and (max-height: 820px) {
+  .hero-inner {
+    padding-block: max(0px, calc((100svh - 64px - 650px) / 2));
+  }
+}
 @media (max-width: 560px) {
   .hero h1 {
     font-size: 3.65rem;
@@ -726,7 +731,7 @@ body {
     transform: none;
   }
   .preview-messages {
-    height: 400px;
+    height: 515px;
   }
   .preview-photo {
     width: 150px;
