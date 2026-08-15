@@ -19,6 +19,7 @@ export default defineSchema({
     expiresAt: v.number(),
     committedAt: v.optional(v.number()),
     messageId: v.optional(v.string()),
+    clientMessageId: v.optional(v.string()),
   })
     .index("storageKey", ["storageKey"])
     .index("subject_state", ["subjectId", "state"]),

@@ -40,6 +40,7 @@ import {
 import { Avatar } from "heroui-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAction, useMutation, useQuery } from "convex/react";
+import type { FunctionArgs } from "convex/server";
 import { api } from "@convex-chat/example-backend/api";
 import * as Clipboard from "expo-clipboard";
 import * as Crypto from "expo-crypto";
@@ -61,11 +62,20 @@ import {
 } from "@/lib/chat";
 import { capitalize } from "@/lib/subjects";
 
-type PendingVoice = {
-  id: string;
+type AttachmentGrantId = FunctionArgs<
+  typeof api.attachments.commitAttachment
+>["grantId"];
+
+type PendingAttachment = {
+  clientMessageId: string;
+  kind: "image" | "voice";
   uri: string;
-  durationMs: number;
+  filename: string;
+  mediaType: string;
+  durationMs?: number;
+  caption?: string;
   replyToMessageId?: string;
+  grantId?: AttachmentGrantId;
   status: "sending" | "failed";
   error?: string;
 };
@@ -82,8 +92,8 @@ export default function ConversationScreen() {
   const [overflowOpen, setOverflowOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hint, setHint] = useState<string | null>(null);
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [pendingVoice, setPendingVoice] = useState<PendingVoice | null>(null);
+  const [pendingAttachment, setPendingAttachment] =
+    useState<PendingAttachment | null>(null);
   const [voiceGestureCancelled, setVoiceGestureCancelled] = useState(false);
   const listRef = useRef<FlatList<DemoMessage>>(null);
   const inputRef = useRef<TextInput>(null);
@@ -125,15 +135,18 @@ export default function ConversationScreen() {
 
   const enqueueVoice = useCallback(
     async (uri: string, durationMs: number) => {
-      const pending: PendingVoice = {
-        id: Crypto.randomUUID(),
+      const pending: PendingAttachment = {
+        clientMessageId: Crypto.randomUUID(),
+        kind: "voice",
         uri,
+        filename: `voice-message-${Date.now()}.m4a`,
+        mediaType: "audio/mp4",
         durationMs,
         replyToMessageId: replyTo?.id,
         status: "sending",
       };
-      setPendingVoice(pending);
-      void sendPendingVoice(pending);
+      setPendingAttachment(pending);
+      void sendPendingAttachment(pending);
     },
     // The reply target is captured in the queued item so a retry sends the
     // same logical message even if the composer state changes meanwhile.
@@ -385,7 +398,7 @@ export default function ConversationScreen() {
   }
 
   async function chooseImage() {
-    if (uploadingImage || editing) return;
+    if (pendingAttachment || editing) return;
     setError(null);
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
@@ -393,52 +406,57 @@ export default function ConversationScreen() {
     });
     if (result.canceled || !result.assets[0]) return;
     const asset = result.assets[0];
-    setUploadingImage(true);
-    forceScrollToBottom.current = true;
-    try {
-      await uploadLocalAttachment({
-        uri: asset.uri,
-        filename: asset.fileName ?? `image-${Date.now()}.jpg`,
-        mediaType: asset.mimeType ?? "image/jpeg",
-        caption: text.trim() || undefined,
-        replyToMessageId: replyTo?.id,
-      });
-      setText("");
-      setReplyTo(null);
-      pinnedToBottom.current = true;
-      scrollToBottom();
-    } catch (cause) {
-      forceScrollToBottom.current = false;
-      setError(errorMessage(cause));
-    } finally {
-      setUploadingImage(false);
-    }
+    const pending: PendingAttachment = {
+      clientMessageId: Crypto.randomUUID(),
+      kind: "image",
+      uri: asset.uri,
+      filename: asset.fileName ?? `image-${Date.now()}.jpg`,
+      mediaType: asset.mimeType ?? "image/jpeg",
+      caption: text.trim() || undefined,
+      replyToMessageId: replyTo?.id,
+      status: "sending",
+    };
+    setPendingAttachment(pending);
+    void sendPendingAttachment(pending);
   }
 
-  async function sendPendingVoice(pending: PendingVoice) {
+  async function sendPendingAttachment(pending: PendingAttachment) {
     setError(null);
     forceScrollToBottom.current = true;
+    let attempted = pending;
     try {
-      await uploadLocalAttachment({
-        uri: pending.uri,
-        filename: `voice-message-${Date.now()}.m4a`,
-        mediaType: "audio/mp4",
-        durationMs: pending.durationMs,
-        replyToMessageId: pending.replyToMessageId,
+      if (!attempted.grantId) {
+        const grantId = await uploadLocalAttachment(attempted);
+        attempted = { ...attempted, grantId };
+        setPendingAttachment((value) =>
+          value?.clientMessageId === attempted.clientMessageId
+            ? attempted
+            : value,
+        );
+      }
+      const grantId = attempted.grantId;
+      if (!grantId) throw new Error("The attachment upload is incomplete");
+      await commitAttachment({
+        grantId,
+        subjectId,
+        clientMessageId: attempted.clientMessageId,
+        caption: attempted.caption,
+        replyToMessageId: attempted.replyToMessageId,
       });
-      setPendingVoice((current) =>
-        current?.id === pending.id ? null : current,
+      setPendingAttachment((current) =>
+        current?.clientMessageId === pending.clientMessageId ? null : current,
       );
+      if (pending.kind === "image") setText("");
       setReplyTo(null);
       pinnedToBottom.current = true;
       scrollToBottom();
     } catch (cause) {
       forceScrollToBottom.current = false;
       const message = errorMessage(cause);
-      setPendingVoice((current) =>
-        current?.id === pending.id
-          ? { ...current, status: "failed", error: message }
-          : current,
+      setPendingAttachment((value) =>
+        value?.clientMessageId === pending.clientMessageId
+          ? { ...attempted, status: "failed", error: message }
+          : value,
       );
       setError(message);
     }
@@ -458,7 +476,7 @@ export default function ConversationScreen() {
     durationMs?: number;
     caption?: string;
     replyToMessageId?: string;
-  }) {
+  }): Promise<AttachmentGrantId> {
     const file = new File(uri);
     if (!file.exists || !file.size)
       throw new Error("The selected file is unavailable");
@@ -482,13 +500,7 @@ export default function ConversationScreen() {
       body: bytes,
     });
     if (!response.ok) throw new Error(`Upload failed (${response.status})`);
-    await commitAttachment({
-      grantId: upload.grantId,
-      subjectId,
-      clientMessageId: Crypto.randomUUID(),
-      caption,
-      replyToMessageId,
-    });
+    return upload.grantId;
   }
 
   function onListScroll(event: NativeSyntheticEvent<NativeScrollEvent>) {
@@ -559,7 +571,7 @@ export default function ConversationScreen() {
           extraData={{
             editingId: editing?.id,
             selectedId: selected?.id,
-            pendingVoice,
+            pendingAttachment,
           }}
           keyExtractor={(message) => message.id}
           keyboardDismissMode={
@@ -599,14 +611,17 @@ export default function ConversationScreen() {
             </View>
           }
           ListFooterComponent={
-            pendingVoice ? (
-              <PendingVoiceBubble
-                pending={pendingVoice}
-                onDismiss={() => setPendingVoice(null)}
+            pendingAttachment ? (
+              <PendingAttachmentBubble
+                pending={pendingAttachment}
+                onDismiss={() => setPendingAttachment(null)}
                 onRetry={() => {
-                  const retry = { ...pendingVoice, status: "sending" as const };
-                  setPendingVoice(retry);
-                  void sendPendingVoice(retry);
+                  const retry = {
+                    ...pendingAttachment,
+                    status: "sending" as const,
+                  };
+                  setPendingAttachment(retry);
+                  void sendPendingAttachment(retry);
                 }}
               />
             ) : null
@@ -702,11 +717,12 @@ export default function ConversationScreen() {
                 {!editing && (
                   <Pressable
                     accessibilityLabel="Choose image"
-                    disabled={uploadingImage}
+                    disabled={Boolean(pendingAttachment)}
                     onPress={() => void chooseImage()}
                     style={styles.inputIcon}
                   >
-                    {uploadingImage ? (
+                    {pendingAttachment?.kind === "image" &&
+                    pendingAttachment.status === "sending" ? (
                       <ActivityIndicator color="#8294aa" size="small" />
                     ) : (
                       <ImagePlus color="#8294aa" size={21} />
@@ -777,7 +793,7 @@ export default function ConversationScreen() {
                 active={recording}
                 cancelled={voiceGestureCancelled}
                 onPressIn={(pageX) => {
-                  if (recording) return;
+                  if (recording || pendingAttachment) return;
                   Keyboard.dismiss();
                   voiceCancelledRef.current = false;
                   setVoiceGestureCancelled(false);
@@ -1018,15 +1034,16 @@ function MicButton({
   );
 }
 
-function PendingVoiceBubble({
+function PendingAttachmentBubble({
   onDismiss,
   onRetry,
   pending,
 }: {
   onDismiss: () => void;
   onRetry: () => void;
-  pending: PendingVoice;
+  pending: PendingAttachment;
 }) {
+  const label = pending.kind === "voice" ? "voice message" : "image";
   return (
     <View style={styles.pendingVoiceRow}>
       <View style={styles.pendingVoiceBubble}>
@@ -1037,15 +1054,20 @@ function PendingVoiceBubble({
         )}
         <Text style={styles.pendingVoiceText}>
           {pending.status === "sending"
-            ? `Sending voice message · ${formatDuration(pending.durationMs)}`
-            : "Voice message failed"}
+            ? pending.kind === "voice"
+              ? `Sending voice message · ${formatDuration(pending.durationMs ?? 0)}`
+              : "Sending image"
+            : `${label[0]?.toUpperCase()}${label.slice(1)} failed`}
         </Text>
         {pending.status === "failed" && (
           <>
-            <Pressable onPress={onRetry}>
+            <Pressable accessibilityLabel={`Retry ${label}`} onPress={onRetry}>
               <Text style={styles.pendingVoiceAction}>Retry</Text>
             </Pressable>
-            <Pressable onPress={onDismiss}>
+            <Pressable
+              accessibilityLabel={`Dismiss failed ${label}`}
+              onPress={onDismiss}
+            >
               <Text style={styles.pendingVoiceAction}>Dismiss</Text>
             </Pressable>
           </>

@@ -59,3 +59,21 @@ metadata, creates short-lived download URLs, and deletes objects. Message
 deletion returns the opaque attachment keys that the host should delete. This
 keeps R2, native Convex storage, S3, and other providers outside the durable
 chat domain without requiring a provider adapter package from `convex-chat`.
+
+## Reliable retries
+
+Create `clientMessageId` before the first upload attempt. Keep it with the
+local pending attachment and reuse the same value for every retry. After the
+bytes upload succeeds, also retain that upload grant or storage key. Retry the
+commit with the same grant and `clientMessageId`. The component then returns the
+existing message if the first commit succeeded but its response did not reach
+the client. Request a new grant only when the upload itself did not complete.
+
+Keep the local file URI, attachment metadata, caption, reply target, and
+`clientMessageId` together until the send succeeds or the user dismisses it.
+The Expo example keeps one pending attachment for the current screen session.
+It does not implement an offline queue or restore pending files after restart.
+
+The host storage layer should expire unused upload grants and remove orphaned
+objects from failed or superseded upload attempts. `convex-chat` owns message
+idempotency. The host application owns upload retry policy and provider cleanup.

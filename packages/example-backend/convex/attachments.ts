@@ -76,12 +76,22 @@ export const commitAttachment = action({
   returns: v.object({ messageId: v.string() }),
   handler: async (ctx, args): Promise<{ messageId: string }> => {
     const grant: Doc<"pendingAttachments"> = await ctx.runQuery(
-      internal.attachments.getPendingGrant,
+      internal.attachments.getGrantForCommit,
       {
         grantId: args.grantId,
         subjectId: args.subjectId,
       },
     );
+    if (grant.state === "committed") {
+      if (
+        !grant.messageId ||
+        !grant.clientMessageId ||
+        grant.clientMessageId !== args.clientMessageId
+      ) {
+        throw new Error("Upload grant was committed for another message");
+      }
+      return { messageId: grant.messageId };
+    }
     await storage.syncMetadata(ctx, grant.storageKey);
     const metadata = await storage.getMetadata(ctx, grant.storageKey);
     if (!metadata?.size || !metadata.contentType) {
@@ -138,6 +148,7 @@ export const commitAttachment = action({
     await ctx.runMutation(internal.attachments.markGrantCommitted, {
       grantId: args.grantId,
       messageId: message.id,
+      clientMessageId: args.clientMessageId,
     });
     return { messageId: message.id };
   },
@@ -185,7 +196,7 @@ export const deleteMessage = mutation({
   },
 });
 
-export const getPendingGrant = internalQuery({
+export const getGrantForCommit = internalQuery({
   args: {
     grantId: v.id("pendingAttachments"),
     subjectId: v.string(),
@@ -195,8 +206,7 @@ export const getPendingGrant = internalQuery({
     if (
       !grant ||
       grant.subjectId !== args.subjectId ||
-      grant.state !== "pending" ||
-      grant.expiresAt < Date.now()
+      (grant.state === "pending" && grant.expiresAt < Date.now())
     ) {
       throw new Error("Upload grant is invalid or expired");
     }
@@ -208,6 +218,7 @@ export const markGrantCommitted = internalMutation({
   args: {
     grantId: v.id("pendingAttachments"),
     messageId: v.string(),
+    clientMessageId: v.string(),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
@@ -217,6 +228,7 @@ export const markGrantCommitted = internalMutation({
       state: "committed",
       committedAt: Date.now(),
       messageId: args.messageId,
+      clientMessageId: args.clientMessageId,
     });
     return null;
   },

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Reuse attachment message IDs across Expo upload retries, add current-session
+  retry controls for images and voice messages, and document the reliability
+  boundary between `convex-chat` and host storage.
+
 ## 0.1.0-rc.1 - 2026-08-09
 
 - Freeze and document the supported `0.1` contract, upgrade and rollback
