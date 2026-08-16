@@ -10,6 +10,51 @@ import {
 import { initConvexTest } from "./test.setup.js";
 
 describe("authorization matrix", () => {
+  test("projects membership access with optimistic concurrency", async () => {
+    const t = initConvexTest();
+    const conversation = await createConversation(t);
+    const initial = await t.query(api.conversations.getMemberAccess, {
+      scopeId: "test",
+      conversationId: conversation.id,
+      subjectId: "bob",
+    });
+
+    expect(initial).toEqual({ access: "read_write", revision: 1 });
+    await expect(
+      t.mutation(api.conversations.setMemberAccess, {
+        scopeId: "test",
+        conversationId: conversation.id,
+        subjectId: "bob",
+        access: "read_only",
+        expectedRevision: initial.revision,
+      }),
+    ).resolves.toEqual({ access: "read_only", revision: 2, changed: true });
+    await expect(
+      t.mutation(api.conversations.setMemberAccess, {
+        scopeId: "test",
+        conversationId: conversation.id,
+        subjectId: "bob",
+        access: "read_write",
+        expectedRevision: initial.revision,
+      }),
+    ).rejects.toThrow("Membership revision conflict");
+    await expect(
+      t.mutation(api.conversations.setMemberAccess, {
+        scopeId: "test",
+        conversationId: conversation.id,
+        subjectId: "bob",
+        access: "read_only",
+        expectedRevision: 2,
+      }),
+    ).resolves.toEqual({ access: "read_only", revision: 2, changed: false });
+
+    const inbox = await t.query(api.conversations.list, {
+      scopeId: "test",
+      subjectId: "bob",
+    });
+    expect(inbox[0]?.access).toBe("read_only");
+  });
+
   test("allows read-only members to read and acknowledge but not write", async () => {
     const t = initConvexTest();
     const conversation = await createConversation(t);
@@ -56,6 +101,46 @@ describe("authorization matrix", () => {
     for (const attempt of writeAttempts) {
       await expect(attempt).rejects.toThrow("read-only");
     }
+  });
+
+  test("removes and restores visibility through supported access changes", async () => {
+    const t = initConvexTest();
+    const conversation = await createConversation(t);
+
+    const hidden = await t.mutation(api.conversations.setMemberAccess, {
+      scopeId: "test",
+      conversationId: conversation.id,
+      subjectId: "bob",
+      access: "none",
+      expectedRevision: 1,
+    });
+    await expect(
+      t.query(api.conversations.list, {
+        scopeId: "test",
+        subjectId: "bob",
+      }),
+    ).resolves.toEqual([]);
+    await expect(
+      t.query(api.messages.list, {
+        scopeId: "test",
+        subjectId: "bob",
+        conversationId: conversation.id,
+      }),
+    ).rejects.toThrow("Conversation not found");
+
+    await t.mutation(api.conversations.setMemberAccess, {
+      scopeId: "test",
+      conversationId: conversation.id,
+      subjectId: "bob",
+      access: "read_write",
+      expectedRevision: hidden.revision,
+    });
+    await expect(
+      t.query(api.conversations.list, {
+        scopeId: "test",
+        subjectId: "bob",
+      }),
+    ).resolves.toHaveLength(1);
   });
 
   test.each([

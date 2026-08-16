@@ -36,6 +36,13 @@ presence operations. A membership with `none` access, an inactive membership,
 or a non-member receives the same not-found behavior and cannot discover the
 conversation.
 
+The trusted `getMemberAccess` query returns a member's current access and
+revision. The trusted `setMemberAccess` mutation changes access only when the
+host supplies that revision. This prevents a stale lifecycle operation from
+restoring access after a newer change. These functions do not decide product
+policy. The host must derive `read_write`, `read_only`, or `none` from its own
+relationship and account state.
+
 Scopes are isolated. Reusing a subject identifier in another scope does not
 grant access, and host table identifiers remain opaque strings.
 
@@ -47,9 +54,11 @@ grant access, and host table identifiers remain opaque strings.
   kind, normalized title, or active member set returns
   `IDEMPOTENCY_CONFLICT`.
 - Membership roles and lifecycle states present in the schema are modeled
-  groundwork. There is no supported invite, leave, remove, role-change,
-  ownership-transfer, archive, or deletion workflow in `0.1`.
+  groundwork. Access projection is supported, but there is no supported invite,
+  leave, remove, role-change, ownership-transfer, archive, or deletion workflow
+  in `0.1`.
 - Conversation listing returns at most 100 summaries, ordered by inbox activity.
+  Each summary includes the current subject's effective access.
 
 ## Message behavior
 

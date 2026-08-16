@@ -16,7 +16,7 @@ application remains responsible for authentication, relationships, and product
 policy.
 
 > [!WARNING]
-> This project is on the `0.1.0-rc.1` release candidate. Its API and data model
+> This project is on the `0.1.0-rc.2` release candidate. Its API and data model
 > may change before the first stable release. Install the candidate from npm with
 > `convex-chat@next`; the `latest` tag still points to the `0.0.1`
 > name-reservation placeholder.
@@ -25,6 +25,7 @@ policy.
 
 - Direct and group conversations with application-defined external keys
 - Chat-local membership checks on every actor operation
+- Revision-safe projection of host-managed membership access
 - Ordered, idempotent sends with per-conversation sequence numbers
 - Realtime history, conversation summaries, and exact unread counts
 - Replies with deletion-safe quote snapshots
@@ -176,7 +177,7 @@ contains the workspace-aware build command.
 
 ## Project status
 
-The `0.1.0-rc.1` candidate covers the features listed above. The maintained roadmap
+The `0.1.0-rc.2` candidate covers the features listed above. The maintained roadmap
 distinguishes supported behavior from modeled groundwork and future work.
 
 The original v0.1 design proposal and roadmap is in

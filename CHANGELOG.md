@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.1.0-rc.2 - 2026-08-16
+
+- Add trusted, revision-safe membership access projection for host-managed
+  lifecycle policy, including `read_write`, `read_only`, and `none` transitions.
+- Include the current subject's effective access in conversation summaries.
+
 - Reuse attachment message IDs across Expo upload retries, add current-session
   retry controls for images and voice messages, and document the reliability
   boundary between `convex-chat` and host storage.

@@ -9,6 +9,7 @@
  */
 
 import type * as conversations from "../conversations.js";
+import type * as limits from "../limits.js";
 import type * as messages from "../messages.js";
 import type * as model from "../model.js";
 import type * as presence from "../presence.js";
@@ -23,6 +24,7 @@ import { anyApi, componentsGeneric } from "convex/server";
 
 const fullApi: ApiFromModules<{
   conversations: typeof conversations;
+  limits: typeof limits;
   messages: typeof messages;
   model: typeof model;
   presence: typeof presence;

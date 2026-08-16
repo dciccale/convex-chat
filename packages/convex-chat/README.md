@@ -7,13 +7,14 @@ Authorization-aware direct and small-group chat primitives for Convex.
 [Live demo](https://convex-chat.dev/) · [Documentation](https://convex-chat.dev/docs)
 
 > [!WARNING]
-> This package is on the `0.1.0-rc.1` release candidate. Its API and data model
+> This package is on the `0.1.0-rc.2` release candidate. Its API and data model
 > may change before the first stable release. Install it with `convex-chat@next`;
 > the `latest` tag still points to the npm `0.0.1` name-reservation placeholder.
 
 ## What it provides
 
 - Conversations and chat-local memberships
+- Revision-safe projection of host-managed membership access
 - Ordered, idempotent text and attachment messages
 - Realtime history and exact unread counts
 - Replies, revision-safe edits, tombstones, and reactions
@@ -65,6 +66,11 @@ Export the functions your client needs from that object, or use the same
 pattern in custom queries and mutations. Conversation creation belongs in a
 host-controlled mutation after the application has checked its relationship
 and product-policy rules.
+
+The host can also use the trusted `getMemberAccess` and `setMemberAccess`
+component functions to project its policy to `read_write`, `read_only`, or
+`none`. The setter requires the current membership revision. Do not expose
+these privileged functions directly to clients.
 
 ## Security boundary
 

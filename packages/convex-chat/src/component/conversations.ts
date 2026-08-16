@@ -7,7 +7,7 @@ import {
   validateIdentifier,
 } from "./limits.js";
 import { chatError } from "./model.js";
-import { conversationKind } from "./validators.js";
+import { conversationKind, membershipAccess } from "./validators.js";
 
 const conversationSummary = v.object({
   id: v.string(),
@@ -22,7 +22,13 @@ const conversationSummary = v.object({
   lastMessagePreview: v.optional(v.string()),
   lastMessageAt: v.optional(v.number()),
   unreadCount: v.number(),
+  access: membershipAccess,
   memberSubjectIds: v.array(v.string()),
+});
+
+const memberAccess = v.object({
+  access: membershipAccess,
+  revision: v.number(),
 });
 
 export const create = mutation({
@@ -198,10 +204,112 @@ export const list = query({
             0,
             conversation.lastUnreadOrdinal - membership.lastReadUnreadOrdinal,
           ),
+          access: membership.access,
           memberSubjectIds: members.map((member) => member.subjectId),
         };
       }),
     );
     return summaries.filter((summary) => summary !== null);
+  },
+});
+
+export const getMemberAccess = query({
+  args: {
+    scopeId: v.string(),
+    conversationId: v.string(),
+    subjectId: v.string(),
+  },
+  returns: memberAccess,
+  handler: async (ctx, args) => {
+    validateIdentifier(args.scopeId, "scopeId");
+    validateIdentifier(args.subjectId, "subjectId");
+    const conversationId = ctx.db.normalizeId(
+      "conversations",
+      args.conversationId,
+    );
+    if (!conversationId) {
+      chatError("CHAT_NOT_FOUND", "Conversation not found");
+    }
+    const conversation = await ctx.db.get(conversationId);
+    if (!conversation || conversation.scopeId !== args.scopeId) {
+      chatError("CHAT_NOT_FOUND", "Conversation not found");
+    }
+    const membership = await ctx.db
+      .query("memberships")
+      .withIndex("conversation_subject", (q) =>
+        q.eq("conversationId", conversationId).eq("subjectId", args.subjectId),
+      )
+      .unique();
+    if (!membership || membership.scopeId !== args.scopeId) {
+      chatError("CHAT_NOT_FOUND", "Conversation not found");
+    }
+    return { access: membership.access, revision: membership.revision };
+  },
+});
+
+export const setMemberAccess = mutation({
+  args: {
+    scopeId: v.string(),
+    conversationId: v.string(),
+    subjectId: v.string(),
+    access: membershipAccess,
+    expectedRevision: v.number(),
+  },
+  returns: v.object({
+    access: membershipAccess,
+    revision: v.number(),
+    changed: v.boolean(),
+  }),
+  handler: async (ctx, args) => {
+    validateIdentifier(args.scopeId, "scopeId");
+    validateIdentifier(args.subjectId, "subjectId");
+    if (
+      !Number.isSafeInteger(args.expectedRevision) ||
+      args.expectedRevision < 1
+    ) {
+      chatError(
+        "INVALID_ARGUMENT",
+        "expectedRevision must be a positive integer",
+      );
+    }
+    const conversationId = ctx.db.normalizeId(
+      "conversations",
+      args.conversationId,
+    );
+    if (!conversationId) {
+      chatError("CHAT_NOT_FOUND", "Conversation not found");
+    }
+    const conversation = await ctx.db.get(conversationId);
+    if (!conversation || conversation.scopeId !== args.scopeId) {
+      chatError("CHAT_NOT_FOUND", "Conversation not found");
+    }
+    const membership = await ctx.db
+      .query("memberships")
+      .withIndex("conversation_subject", (q) =>
+        q.eq("conversationId", conversationId).eq("subjectId", args.subjectId),
+      )
+      .unique();
+    if (!membership || membership.scopeId !== args.scopeId) {
+      chatError("CHAT_NOT_FOUND", "Conversation not found");
+    }
+    if (membership.revision !== args.expectedRevision) {
+      chatError("REVISION_CONFLICT", "Membership revision conflict");
+    }
+    if (membership.access === args.access) {
+      return {
+        access: membership.access,
+        revision: membership.revision,
+        changed: false,
+      };
+    }
+    const now = Date.now();
+    const revision = membership.revision + 1;
+    await ctx.db.patch(membership._id, {
+      access: args.access,
+      revision,
+      inboxUpdatedAt: now,
+      updatedAt: now,
+    });
+    return { access: args.access, revision, changed: true };
   },
 });

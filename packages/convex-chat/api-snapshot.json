@@ -1,5 +1,5 @@
 {
-  "declarationSha256": "69036c505c467d664616fa581830cc31a3dc2491b3d331ce2388493a4a476b43",
+  "declarationSha256": "76215fea49a0bd86198b8ff6c51099cb5895ebfadfa1a24de15ab6e5c8c148da",
   "exports": [
     ".",
     "./_generated/component.js",

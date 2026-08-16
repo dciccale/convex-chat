@@ -27,4 +27,17 @@ icon: Braces
 
 Applications may omit the presence wrappers when presence is disabled by product policy.
 
+## Trusted membership access
+
+Hosts can call `components.chat.conversations.getMemberAccess` and
+`components.chat.conversations.setMemberAccess` from trusted Convex functions.
+The mutation requires the current membership revision. It projects host policy
+to `read_write`, `read_only`, or `none` without moving relationship rules into
+the component.
+
+Do not expose these component functions directly to clients. Authenticate the
+caller and apply product policy in the host mutation first. A nested component
+mutation participates in the host mutation transaction, so both changes roll
+back if either operation fails.
+
 See the generated TypeScript declarations and package README for the exact arguments available in the current release candidate.

@@ -38,11 +38,19 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
         { created: boolean; id: string },
         Name
       >;
+      getMemberAccess: FunctionReference<
+        "query",
+        "internal",
+        { conversationId: string; scopeId: string; subjectId: string },
+        { access: "read_write" | "read_only" | "none"; revision: number },
+        Name
+      >;
       list: FunctionReference<
         "query",
         "internal",
         { limit?: number; scopeId: string; subjectId: string },
         Array<{
+          access: "read_write" | "read_only" | "none";
           id: string;
           kind: "direct" | "group";
           lastMessageAt?: number;
@@ -53,6 +61,23 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           unreadCount: number;
           updatedAt: number;
         }>,
+        Name
+      >;
+      setMemberAccess: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          access: "read_write" | "read_only" | "none";
+          conversationId: string;
+          expectedRevision: number;
+          scopeId: string;
+          subjectId: string;
+        },
+        {
+          access: "read_write" | "read_only" | "none";
+          changed: boolean;
+          revision: number;
+        },
         Name
       >;
     };
