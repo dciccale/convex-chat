@@ -84,15 +84,15 @@
   },
   "devDependencies": {
     "@edge-runtime/vm": "^5.0.0",
-    "@types/node": "^24.12.2",
-    "@vitest/coverage-v8": "4.1.4",
-    "convex": "1.43.0",
-    "convex-test": "0.0.49",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "@types/node": "^26.2.0",
+    "@vitest/coverage-v8": "4.1.11",
+    "convex": "1.44.0",
+    "convex-test": "0.0.55",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
-    "vite": "8.2.0",
-    "vitest": "4.1.4"
+    "vite": "8.2.1",
+    "vitest": "4.1.11"
   },
   "publishConfig": {
     "access": "public",
