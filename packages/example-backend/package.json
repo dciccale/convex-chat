@@ -16,10 +16,10 @@
   },
   "dependencies": {
     "@convex-dev/r2": "0.10.2",
-    "convex": "1.43.0",
+    "convex": "1.45.0",
     "convex-chat": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "5.9.3"
+    "typescript": "7.0.2"
   }
 }
