@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.1.0 - 2026-09-02
+
+- Promote the tested `0.1` contract to the first stable release after the
+  release-candidate feedback window closed with no reported critical or
+  high-severity defects.
+
 ## 0.1.0-rc.2 - 2026-08-16
 
 - Add trusted, revision-safe membership access projection for host-managed

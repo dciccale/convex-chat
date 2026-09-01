@@ -15,7 +15,7 @@ license_target: Apache-2.0
 > [!NOTE]
 > This is the original v0.1 design proposal and implementation roadmap. The
 > repository README, package README, changelog, and exported types describe the
-> currently implemented release candidate.
+> implemented stable release.
 >
 > The maintained [supported contract](/docs/reference/supported-contract)
 > supersedes proposal details that changed during implementation. In

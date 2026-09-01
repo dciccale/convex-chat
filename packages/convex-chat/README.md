@@ -6,11 +6,6 @@ Authorization-aware direct and small-group chat primitives for Convex.
 
 [Live demo](https://convex-chat.dev/) · [Documentation](https://convex-chat.dev/docs)
 
-> [!WARNING]
-> This package is on the `0.1.0-rc.2` release candidate. Its API and data model
-> may change before the first stable release. Install it with `convex-chat@next`;
-> the `latest` tag still points to the npm `0.0.1` name-reservation placeholder.
-
 ## What it provides
 
 - Conversations and chat-local memberships
@@ -25,7 +20,7 @@ Authorization-aware direct and small-group chat primitives for Convex.
 ## Install
 
 ```sh
-pnpm add convex-chat@next convex
+pnpm add convex-chat convex
 ```
 
 Register the component in `convex/convex.config.ts`:

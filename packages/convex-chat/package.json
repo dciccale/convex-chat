@@ -1,6 +1,6 @@
 {
   "name": "convex-chat",
-  "version": "0.1.0-rc.2",
+  "version": "0.1.0",
   "description": "Authorization-aware human chat primitives for Convex applications.",
   "keywords": [
     "chat",
@@ -96,7 +96,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "tag": "next"
+    "tag": "latest"
   },
   "dependencies": {
     "@convex-dev/presence": "0.4.0"

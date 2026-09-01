@@ -5,7 +5,7 @@ Authorization-aware chat primitives for [Convex](https://www.convex.dev/).
 [![CI](https://github.com/dciccale/convex-chat/actions/workflows/ci.yml/badge.svg)](https://github.com/dciccale/convex-chat/actions/workflows/ci.yml)
 [![Convex Component](https://www.convex.dev/components/badge/convex-chat)](https://www.convex.dev/components/convex-chat)
 [![Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-[![release candidate](https://img.shields.io/badge/status-release%20candidate-blue.svg)](CHANGELOG.md)
+[![stable](https://img.shields.io/badge/status-stable-brightgreen.svg)](CHANGELOG.md)
 
 [Live demo](https://convex-chat.dev/) · [Documentation](https://convex-chat.dev/docs)
 
@@ -14,12 +14,6 @@ human messaging. It owns the durable chat invariants—membership, ordering,
 idempotency, unread state, message lifecycle, and presence—while your
 application remains responsible for authentication, relationships, and product
 policy.
-
-> [!WARNING]
-> This project is on the `0.1.0-rc.2` release candidate. Its API and data model
-> may change before the first stable release. Install the candidate from npm with
-> `convex-chat@next`; the `latest` tag still points to the `0.0.1`
-> name-reservation placeholder.
 
 ## Features
 
@@ -124,7 +118,7 @@ That is intentionally insecure demo plumbing; never accept `scopeId` or
 
 ## Add the component to an application
 
-Install `convex-chat@next` and register it in `convex/convex.config.ts`:
+Install `convex-chat` and register it in `convex/convex.config.ts`:
 
 ```ts
 import chat from "convex-chat/convex.config.js";
@@ -177,8 +171,9 @@ contains the workspace-aware build command.
 
 ## Project status
 
-The `0.1.0-rc.2` candidate covers the features listed above. The maintained roadmap
-distinguishes supported behavior from modeled groundwork and future work.
+The stable `0.1.0` release covers the features listed above. The maintained
+roadmap distinguishes supported behavior from modeled groundwork and future
+work.
 
 The original v0.1 design proposal and roadmap is in
 [`apps/web/content/docs/reference/convex-chat-v0.1-prd.md`](apps/web/content/docs/reference/convex-chat-v0.1-prd.md). Changes since the
